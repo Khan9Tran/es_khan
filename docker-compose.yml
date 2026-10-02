@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  eskhan:
+    build: .
+    container_name: eskhan
+    restart: unless-stopped
+    ports:
+      - "8989:8989"
+    volumes:
+      - eskhan_data:/root/.eskhan
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+
+volumes:
+  eskhan_data:

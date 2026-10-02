@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESKhan - Elasticsearch Query IDE</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2338bdf8%22 stroke-width=%222%22><path d=%22M13 2L3 14h9l-1 8 10-12h-9l1-8z%22/></svg>">
+</head>
+<body class="theme-dark">
+  <!-- Top Application Bar -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo">
+        <div class="logo-badge">
+          <svg class="icon icon-bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <span class="logo-title">ESKhan</span>
+        <span class="logo-tag">9</span>
+      </div>
+
+      <!-- Cluster Selector -->
+      <div class="cluster-selector-container">
+        <div class="cluster-status-badge" id="clusterStatusBadge" title="Cluster Health">
+          <span class="status-dot dot-gray"></span>
+          <span id="clusterStatusText">Connecting...</span>
+        </div>
+        <select id="clusterSelect" class="form-select" title="Switch Cluster Profile">
+          <option value="">Loading profiles...</option>
+        </select>
+        <button id="btnManageClusters" class="btn btn-icon" title="Manage Cluster Connections">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <!-- Safe Mode Toggle -->
+      <button id="btnSafeMode" class="btn btn-sm btn-safe-on" title="Safe Mode prevents accidental document modifications or deletions on production clusters">
+        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        <span id="safeModeLabel" data-i18n="safe_mode_on">Safe Mode: ON</span>
+      </button>
+
+      <!-- Smart Query Linter Badge -->
+      <div id="linterBadge" class="linter-badge hidden" title="Click to view Query Performance & Optimization Tips">
+        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <span id="linterCount">0</span> <span data-i18n="opt_tips">Optimization Tips</span>
+      </div>
+
+      <!-- Antigravity Trigger -->
+      <button id="btnAntigravity" class="btn btn-sm btn-antigravity" title="Antigravity (Cmd+K hoặc Ctrl+K)">
+        <svg class="icon icon-sm ai-sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2l2.4 5.6L20 10l-4.4 4 1.4 6-5-3.2-5 3.2 1.4-6-4.4-4 5.6-2.4z"></path>
+        </svg>
+        <span>Antigravity</span>
+        <span class="status-dot dot-green" id="antigravityDot" style="width:7px; height:7px; margin-left:2px;" title="Antigravity Ready"></span>
+        <kbd class="shortcut-badge">⌘K</kbd>
+      </button>
+    </div>
+
+    <div class="header-right">
+      <!-- Language Toggle (VI / EN) -->
+      <button id="btnToggleLang" class="btn btn-sm btn-secondary" title="Chuyển ngôn ngữ / Switch Language (VI / EN)">
+        <span class="lang-flag" id="langFlag">🇻🇳</span>
+        <span id="langLabel">VI</span>
+      </button>
+
+      <button id="btnToggleTheme" class="btn btn-icon" title="Toggle Light / Dark Theme">
+        <svg class="icon" id="themeIconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="icon hidden" id="themeIconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+      <button id="btnFormat" class="btn btn-secondary" title="Format / Prettify Query (Cmd+Shift+F)">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="16 18 22 12 16 6"></polyline>
+          <polyline points="8 6 2 12 8 18"></polyline>
+        </svg>
+        <span data-i18n="btn_format">Format</span>
+      </button>
+      <button id="btnGolangModal" class="btn btn-secondary" title="Chuyển đổi Golang Code ⇋ Query DSL">
+        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 18l6-6-6-6M8 6l-6 6 6 6"></path>
+        </svg>
+        <span data-i18n="btn_golang">Go Code</span>
+      </button>
+      <button id="btnSaveSnippetModal" class="btn btn-secondary" title="Save Query as Snippet">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+        <span data-i18n="btn_save">Save</span>
+      </button>
+      <button id="btnRunQuery" class="btn btn-primary" title="Execute Query (Cmd+Enter or Ctrl+Enter)">
+        <svg class="icon icon-play" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+        <span data-i18n="btn_run">Run Query</span>
+        <kbd class="shortcut-badge">⌘⏎</kbd>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workspace Layout -->
+  <div class="main-layout">
+    <!-- Left Navigation / Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-tabs">
+        <button class="sidebar-tab active" data-tab="tab-indices" title="Indices & Mappings">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+          </svg>
+          <span data-i18n="tab_indices">Indices</span>
+        </button>
+        <button class="sidebar-tab" data-tab="tab-snippets" title="Saved Query Snippets">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span data-i18n="tab_snippets">Snippets</span>
+        </button>
+        <button class="sidebar-tab" data-tab="tab-history" title="Query History">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span data-i18n="tab_history">History</span>
+        </button>
+      </div>
+
+      <!-- Tab Content: Indices -->
+      <div class="sidebar-content active" id="tab-indices">
+        <div class="sidebar-search">
+          <div class="search-input-wrapper">
+            <svg class="icon icon-sm search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="indicesSearchInput" class="form-input search-input" placeholder="Filter indices..." data-i18n-ph="filter_indices_ph">
+          </div>
+          <button id="btnRefreshIndices" class="btn btn-icon" title="Refresh Indices List">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="indices-list" id="indicesList">
+          <div class="empty-state" data-i18n="loading_indices">Loading indices...</div>
+        </div>
+      </div>
+
+      <!-- Tab Content: Snippets -->
+      <div class="sidebar-content" id="tab-snippets">
+        <div class="sidebar-header-action">
+          <div class="search-input-wrapper" style="width: 100%;">
+            <svg class="icon icon-sm search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="snippetsSearchInput" class="form-input search-input" placeholder="Search snippets..." data-i18n-ph="search_snippets_ph">
+          </div>
+        </div>
+        <div class="snippets-list" id="snippetsList">
+          <div class="empty-state" data-i18n="no_snippets_yet">No saved snippets yet</div>
+        </div>
+      </div>
+
+      <!-- Tab Content: History -->
+      <div class="sidebar-content" id="tab-history">
+        <div class="sidebar-header-action">
+          <button id="btnClearHistory" class="btn btn-sm btn-danger" style="width: 100%;">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            <span data-i18n="btn_clear_history">Clear History</span>
+          </button>
+        </div>
+        <div class="history-list" id="historyList">
+          <div class="empty-state" data-i18n="no_history_yet">No query history yet</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center & Right Split: Editor & Results -->
+    <main class="workbench">
+      <!-- Top Query Editor Pane -->
+      <section class="editor-pane">
+        <div class="editor-tabs-bar">
+          <div class="editor-tabs-list" id="editorTabsList">
+            <div class="editor-tab active" data-tab-id="1">
+              <span class="tab-title">Query 1</span>
+              <span class="tab-close" title="Close Tab">&times;</span>
+            </div>
+          </div>
+          <button id="btnNewTab" class="btn-new-tab" title="New Query Tab">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+
+          <!-- Authoritative Target Index Bar for Current Tab -->
+          <div class="editor-target-bar">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+            </svg>
+            <span class="target-bar-label" data-i18n="target_index">Target Index:</span>
+            <select id="editorIndexSelect" class="form-select editor-idx-select" title="Target index for this query tab">
+              <option value="">(None / _search)</option>
+            </select>
+            <button id="btnInsertEndpoint" class="btn btn-xs btn-secondary" title="Sync / update 'POST /<index>/_search' into Line 1">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 10 4 15 9 20"></polyline>
+                <path d="M20 4v7a4 4 0 0 1-4 4H4"></path>
+              </svg>
+              <span data-i18n="sync_line1">Sync to Line 1</span>
+            </button>
+          </div>
+
+          <div class="editor-status-indicator" id="editorSyntaxStatus" data-i18n="json_valid">JSON Valid</div>
+        </div>
+
+        <!-- Inline Antigravity AI Prompt Bar (Cmd+K) -->
+        <div class="ai-prompt-bar hidden" id="aiPromptBar">
+          <div class="ai-prompt-header">
+            <div class="ai-brand">
+              <svg class="icon icon-sm ai-sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2l2.4 5.6L20 10l-4.4 4 1.4 6-5-3.2-5 3.2 1.4-6-4.4-4 5.6-2.4z"></path>
+              </svg>
+              <span>Antigravity (Local CLI)</span>
+              <span class="tag-badge code-badge" id="aiActiveIndexBadge" style="font-size:10px;">Schema: Tự động</span>
+            </div>
+            <button class="btn-close-sm" id="btnCloseAIPromptBar" title="Đóng thanh AI (Esc)">&times;</button>
+          </div>
+          <div class="ai-prompt-input-row">
+            <input type="text" id="aiPromptInput" class="form-input ai-input" placeholder="Nhập yêu cầu bằng Tiếng Việt (vd: 'Tìm sản phẩm điện thoại dưới 15tr còn hàng và sắp xếp giá tăng dần')..." />
+            <button id="btnAIGenerate" class="btn btn-primary btn-ai-run">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+              <span>Tạo Query</span>
+            </button>
+          </div>
+          <div class="ai-prompt-chips">
+            <span class="ai-chip" data-prompt="Tìm kiếm tất cả document và giới hạn 20 kết quả">Mẫu cơ bản</span>
+            <span class="ai-chip" data-prompt="Lọc theo khoảng giá từ 100000 đến 500000 và còn hàng">Lọc khoảng giá</span>
+            <span class="ai-chip" data-prompt="Tìm kiếm đa trường tiếng Việt có dấu/không dấu kèm highlight">Tiếng Việt + Highlight</span>
+            <span class="ai-chip" data-prompt="Gom nhóm aggregations theo category lấy top 10">Aggregation thống kê</span>
+          </div>
+
+          <!-- Clarification Question & Interactive Suggested Field Chips -->
+          <div class="ai-clarification-box hidden" id="aiClarificationBox" style="margin-top: 10px; padding: 12px; border-radius: 6px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35);">
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <svg class="icon icon-sm" style="color: #f59e0b; flex-shrink: 0; margin-top: 2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <div style="flex: 1;">
+                <div id="aiClarificationQuestion" style="font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 8px; line-height: 1.4;"></div>
+                <div id="aiClarificationOptions" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Verified Schema Notification -->
+          <div class="ai-verified-box hidden" id="aiVerifiedBox" style="margin-top: 8px; font-size: 12px; color: var(--success); display: flex; align-items: center; gap: 6px; padding: 4px 8px; background: rgba(16, 185, 129, 0.1); border-radius: 4px;">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span id="aiVerifiedText">Đã xác thực 100% schema trường truy vấn</span>
+          </div>
+
+          <div class="ai-loading-indicator hidden" id="aiLoadingIndicator">
+            <span class="spinner"></span>
+            <span id="aiLoadingText">Antigravity CLI đang phân tích mapping và sinh Query DSL...</span>
+          </div>
+        </div>
+
+        <!-- Monaco / Fallback Container -->
+        <div id="monacoEditorContainer" class="editor-container"></div>
+      </section>
+
+      <!-- Resizer Bar -->
+      <div class="horizontal-resizer" id="paneResizer" title="Drag to resize"></div>
+
+      <!-- Bottom Results Pane -->
+      <section class="results-pane">
+        <!-- Results Header / Metrics Bar -->
+        <div class="results-header">
+          <div class="results-views-switch">
+            <button class="view-tab active" data-view="tree">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 3v12"></path>
+                <circle cx="18" cy="6" r="3"></circle>
+                <circle cx="6" cy="18" r="3"></circle>
+                <path d="M18 9a9 9 0 0 1-9 9"></path>
+              </svg>
+              <span data-i18n="view_tree">JSON Tree</span>
+            </button>
+            <button class="view-tab" data-view="table">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="3" y1="9" x2="21" y2="9"></line>
+                <line x1="3" y1="15" x2="21" y2="15"></line>
+                <line x1="9" y1="3" x2="9" y2="21"></line>
+              </svg>
+              <span data-i18n="view_table">Table View</span>
+            </button>
+            <button class="view-tab" data-view="chart" id="tabViewChart">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+              </svg>
+              <span data-i18n="view_chart">Aggregations</span>
+            </button>
+            <button class="view-tab" data-view="raw">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                <line x1="9" y1="20" x2="15" y2="20"></line>
+                <line x1="12" y1="4" x2="12" y2="20"></line>
+              </svg>
+              <span data-i18n="view_raw">Raw JSON</span>
+            </button>
+          </div>
+
+          <div class="metrics-bar" id="metricsBar">
+            <div class="metric-item status-badge" id="metricStatus">Status: Ready</div>
+            <div class="metric-item" id="metricTook">Took: 0 ms</div>
+            <div class="metric-item" id="metricLatency">Latency: 0 ms</div>
+            <div class="metric-item" id="metricHits">Hits: 0</div>
+            <div class="metric-item" id="metricShards">Shards: -</div>
+          </div>
+
+          <div class="results-actions">
+            <button id="btnCopyResult" class="btn btn-sm btn-secondary" title="Copy result to clipboard">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span data-i18n="btn_copy">Copy</span>
+            </button>
+            <button id="btnExportCSV" class="btn btn-sm btn-secondary" title="Export Table to CSV">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>CSV</span>
+            </button>
+            <button id="btnAIExplain" class="btn btn-sm btn-secondary" title="Giải thích câu truy vấn này bằng Tiếng Việt với Antigravity">
+              <svg class="icon icon-sm" style="color:#38bdf8;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span data-i18n="btn_ai_explain">Explain</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Results Body -->
+        <div class="results-body">
+          <!-- View 1: JSON Tree -->
+          <div class="result-view-panel active" id="view-tree">
+            <div class="tree-controls-bar">
+              <input type="text" id="jsonTreeFilterInput" class="form-input search-input" placeholder="Search JSON keys or values..." data-i18n-ph="search_tree_ph">
+              <div class="scope-toggle-group">
+                <button class="scope-btn active" id="btnScopeHits" title="Focus directly on hits/documents data (_source) - clean & no metadata clutter">
+                  <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                  </svg>
+                  <span data-i18n="scope_hits">Hits Data (_source)</span>
+                </button>
+                <button class="scope-btn" id="btnScopeFull" title="Show complete Elasticsearch response envelope (shards, took, raw wrapper)">
+                  <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                    <line x1="9" y1="20" x2="15" y2="20"></line>
+                    <line x1="12" y1="4" x2="12" y2="20"></line>
+                  </svg>
+                  <span data-i18n="scope_full">Full Response</span>
+                </button>
+              </div>
+              <button id="btnExpandAll" class="btn btn-sm btn-secondary" title="Expand all nodes" data-i18n="btn_expand_all">Expand All</button>
+              <button id="btnCollapseAll" class="btn btn-sm btn-secondary" title="Collapse all nodes" data-i18n="btn_collapse_all">Collapse All</button>
+            </div>
+            <div id="jsonTreeContainer" class="json-tree-container">
+              <div class="empty-state" data-i18n="empty_results">Run a query (Cmd+Enter) to view results here</div>
+            </div>
+          </div>
+
+          <!-- View 2: Table Grid -->
+          <div class="result-view-panel" id="view-table">
+            <div class="table-container" id="tableContainer">
+              <div class="empty-state" data-i18n="empty_table">No table hits to display. Run a search query with hits.</div>
+            </div>
+          </div>
+
+          <!-- View 3: Visual Aggregations Chart -->
+          <div class="result-view-panel" id="view-chart">
+            <div class="chart-container" id="aggChartContainer">
+              <div class="empty-state">Run a query containing "aggs" to view interactive charts here</div>
+            </div>
+          </div>
+
+          <!-- View 4: Raw JSON -->
+          <div class="result-view-panel" id="view-raw">
+            <pre id="rawJsonViewer" class="raw-json-viewer"></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Drawer: Document Inspector & Quick Editor -->
+  <div class="modal-overlay" id="docInspectorModal">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <div class="modal-title-with-icon">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          <h3>Document Inspector & Editor</h3>
+        </div>
+        <button class="btn-close" id="btnCloseDocInspector">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="doc-meta-banner">
+          <div><span class="meta-label">Index:</span> <span id="docInspectIndex" class="tag-badge"></span></div>
+          <div><span class="meta-label">Doc ID:</span> <span id="docInspectId" class="tag-badge code-badge"></span></div>
+          <div id="docInspectSafeNotice" class="safe-mode-badge hidden">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            Safe Mode: Read-Only
+          </div>
+        </div>
+        <div class="doc-editor-wrapper">
+          <label class="input-label" style="margin-bottom: 6px; display: block;">Document Source (_source):</label>
+          <textarea id="docInspectContent" class="form-input doc-textarea"></textarea>
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button type="button" id="btnDeleteDoc" class="btn btn-danger">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            <span>Delete Document</span>
+          </button>
+          <button type="button" id="btnSaveDoc" class="btn btn-primary">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span>Save Changes</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Query Linter Warnings Popover -->
+  <div class="modal-overlay" id="linterModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-with-icon">
+          <svg class="icon" style="color:var(--warning);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <h3>Query Performance & Optimization Advice</h3>
+        </div>
+        <button class="btn-close" id="btnCloseLinterModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="linterWarningsList" class="linter-warnings-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Cluster Connections Manager -->
+  <div class="modal-overlay" id="clusterModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-with-icon">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+          </svg>
+          <h3>Elasticsearch Clusters</h3>
+        </div>
+        <button class="btn-close" id="btnCloseClusterModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="cluster-profiles-list" id="clusterProfilesList"></div>
+        <hr class="divider">
+        <h4 style="margin-bottom: 12px; font-size: 13px; font-weight: 600;">Add / Edit Connection</h4>
+        <form id="clusterForm" class="cluster-form">
+          <input type="hidden" id="connId">
+          <div class="form-row">
+            <label>Name:</label>
+            <input type="text" id="connName" class="form-input" placeholder="e.g. Local ES 7.17, Staging Cluster" required>
+          </div>
+          <div class="form-row">
+            <label>Cluster URL:</label>
+            <input type="url" id="connUrl" class="form-input" placeholder="http://localhost:9200 or https://..." required>
+          </div>
+          <div class="form-row">
+            <label>Auth Type:</label>
+            <select id="connAuthType" class="form-select">
+              <option value="none">No Auth</option>
+              <option value="basic">Basic Auth (Username / Password)</option>
+              <option value="apikey">Elastic API Key</option>
+              <option value="bearer">Bearer Token</option>
+            </select>
+          </div>
+          <div class="form-row auth-field" id="authFieldBasic">
+            <label>Credentials:</label>
+            <div class="input-group">
+              <input type="text" id="connUsername" class="form-input" placeholder="Username (e.g. elastic)">
+              <input type="password" id="connPassword" class="form-input" placeholder="Password">
+            </div>
+          </div>
+          <div class="form-row auth-field hidden" id="authFieldAPIKey">
+            <label>API Key:</label>
+            <input type="text" id="connApiKey" class="form-input" placeholder="Base64 or Id:Key API Key">
+          </div>
+          <div class="form-row auth-field hidden" id="authFieldBearer">
+            <label>Bearer Token:</label>
+            <input type="text" id="connBearer" class="form-input" placeholder="JWT / Bearer Token">
+          </div>
+          <div class="form-row">
+            <label class="checkbox-label">
+              <input type="checkbox" id="connInsecure" checked>
+              <span>Skip SSL / TLS Verification (InsecureSkipVerify)</span>
+            </label>
+          </div>
+          <div class="modal-actions">
+            <button type="button" id="btnTestConn" class="btn btn-secondary">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <span>Test Connection</span>
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+              </svg>
+              <span>Save Profile</span>
+            </button>
+          </div>
+          <div id="testConnResult" class="test-result-box"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Save Snippet -->
+  <div class="modal-overlay" id="saveSnippetModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-with-icon">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <h3>Save Query Snippet</h3>
+        </div>
+        <button class="btn-close" id="btnCloseSnippetModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="saveSnippetForm">
+          <div class="form-row">
+            <label>Title:</label>
+            <input type="text" id="snipTitle" class="form-input" placeholder="e.g. Search Active Users with Filter" required>
+          </div>
+          <div class="form-row">
+            <label>Description:</label>
+            <input type="text" id="snipDesc" class="form-input" placeholder="Optional notes for teammates">
+          </div>
+          <div class="form-row">
+            <label>Tags (comma separated):</label>
+            <input type="text" id="snipTags" class="form-input" placeholder="users, bool, prod">
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" id="btnCancelSnippet">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Snippet</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Index Mapping Inspector -->
+  <div class="modal-overlay" id="mappingModal">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <div class="modal-title-with-icon">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+          </svg>
+          <h3 id="mappingModalTitle">Index Mapping & Fields</h3>
+        </div>
+        <button class="btn-close" id="btnCloseMappingModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="mapping-search-bar">
+          <input type="text" id="mappingFilterInput" class="form-input search-input" placeholder="Filter fields by name or type...">
+          <button id="btnInsertTemplateQuery" class="btn btn-secondary">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>New Query for this Index</span>
+          </button>
+        </div>
+        <div class="mapping-fields-table-wrapper">
+          <table class="data-table" id="mappingFieldsTable">
+            <thead>
+              <tr>
+                <th>Field Name (Dot Notation)</th>
+                <th>Data Type</th>
+                <th>Detail</th>
+              </tr>
+            </thead>
+            <tbody id="mappingFieldsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Antigravity CLI Local Bridge Info -->
+  <div class="modal-overlay" id="antigravityModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-with-icon">
+          <svg class="icon" style="color: #38bdf8;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l2.4 5.6L20 10l-4.4 4 1.4 6-5-3.2-5 3.2 1.4-6-4.4-4 5.6-2.4z"></path>
+          </svg>
+          <h3>Antigravity CLI Local Bridge</h3>
+        </div>
+        <button class="btn-close" id="btnCloseAntigravityModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="ai-status-card">
+          <div class="ai-status-row">
+            <span class="meta-label">Trạng thái:</span>
+            <span id="agModalStatusBadge" class="tag-badge status-green">🟢 Đang hoạt động</span>
+          </div>
+          <div class="ai-status-row">
+            <span class="meta-label">Cơ chế xác thực:</span>
+            <span>Local CLI Bridge (Tài khoản Google Antigravity)</span>
+          </div>
+          <div class="ai-status-row">
+            <span class="meta-label">Đường dẫn binary:</span>
+            <code id="agModalPath" class="code-badge">/Users/admin/.local/bin/agy</code>
+          </div>
+          <div class="ai-status-row">
+            <span class="meta-label">Phím tắt kích hoạt:</span>
+            <span class="tag-badge code-badge">⌘K (hoặc Ctrl+K)</span>
+          </div>
+        </div>
+        <div style="margin-top: 14px; font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+          ESKhan kết nối trực tiếp với <strong>Antigravity CLI</strong> trên máy tính của bạn thông qua cầu nối cục bộ (Local Bridge). Toàn bộ quyền truy cập và tài khoản được xác thực tự động bởi Antigravity trên máy tính, không cần cấu hình API key bên ngoài.
+        </div>
+        <div class="modal-actions" style="margin-top: 18px;">
+          <button type="button" class="btn btn-secondary" id="btnCheckAgyStatus">Kiểm tra kết nối</button>
+          <button type="button" class="btn btn-primary" id="btnOpenAIPromptFromModal">Mở Antigravity Prompt (⌘K)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Antigravity Query Explanation -->
+  <div class="modal-overlay" id="aiExplainModal">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <div class="modal-title-with-icon">
+          <svg class="icon" style="color: #38bdf8;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <h3>Giải thích Truy vấn bởi Antigravity</h3>
+        </div>
+        <button class="btn-close" id="btnCloseExplainModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="aiExplainContent" class="ai-explanation-content">Đang phân tích truy vấn...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Golang DSL Bidirectional Converter -->
+  <div class="modal-overlay" id="golangModal">
+    <div class="modal-card modal-large" style="max-width: 860px; width: 92vw;">
+      <div class="modal-header">
+        <div class="modal-title-with-icon">
+          <svg class="icon" style="color: #00ADD8;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <h3 data-i18n="golang_modal_title">Chuyển đổi Golang Code ⇋ Query DSL</h3>
+        </div>
+        <button class="btn-close" id="btnCloseGolangModal">&times;</button>
+      </div>
+
+      <!-- Mode Tabs: Query -> Go vs Go -> Query -->
+      <div class="converter-tabs-bar" style="display: flex; gap: 8px; border-bottom: 1px solid var(--border); padding: 0 16px 12px 16px;">
+        <button type="button" class="btn btn-sm btn-primary" id="tabModeQueryToGo">
+          <span data-i18n="tab_query_to_go">Query DSL ➔ Golang Code</span>
+        </button>
+        <button type="button" class="btn btn-sm btn-secondary" id="tabModeGoToQuery">
+          <span data-i18n="tab_go_to_query">Golang Code ➔ Query DSL</span>
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding-top: 14px;">
+        <!-- Panel 1: Query -> Go -->
+        <div id="panelQueryToGo">
+          <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px; display:flex; justify-content:space-between; align-items:center;">
+            <span>Mã nguồn Golang được sinh theo chuẩn Structs của bạn:</span>
+            <div style="display: flex; gap: 6px;">
+              <button type="button" class="btn btn-xs btn-secondary" id="btnCopyGolangStructs" title="Sao chép toàn bộ khai báo struct EsFilters, EsRanges, EsSort...">
+                <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <span data-i18n="btn_copy_go_structs">Chép Mẫu Structs Go</span>
+              </button>
+              <button type="button" class="btn btn-xs btn-primary" id="btnCopyGolangCode">
+                <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <span id="labelCopyGoCode" data-i18n="btn_copy_go_code">Sao chép Code Go</span>
+              </button>
+            </div>
+          </div>
+          <div class="code-preview-wrapper" style="position: relative; max-height: 420px; overflow: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-card);">
+            <pre style="margin: 0; padding: 14px; font-family: monospace; font-size: 13px; line-height: 1.5; color: var(--text);"><code id="golangGeneratedOutput">// Đang tạo mã nguồn...</code></pre>
+          </div>
+        </div>
+
+        <!-- Panel 2: Go -> Query -->
+        <div id="panelGoToQuery" class="hidden">
+          <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+            Nhập hoặc dán mã nguồn Golang của bạn vào đây:
+          </div>
+          <textarea id="golangInputCode" class="form-textarea" rows="8" style="width: 100%; font-family: monospace; font-size: 13px; line-height: 1.4; padding: 10px; background: var(--bg-input); color: var(--text); border: 1px solid var(--border); border-radius: 6px; resize: vertical;" placeholder="filters := EsFiltersArr{}.&#10;    Add(EsFilters{Type: &quot;term&quot;, Key: &quot;order_status&quot;, Value: &quot;completed&quot;})&#10;query := filters.Query().Must().Bool().Query().Paging(0, 20)"></textarea>
+          <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <button type="button" class="btn btn-sm btn-primary" id="btnConvertGoToDSL">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+              <span data-i18n="btn_compile_to_dsl">Biên dịch sang Query DSL</span>
+            </button>
+            <button type="button" class="btn btn-sm btn-success hidden" id="btnApplyDSLToEditor">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span data-i18n="btn_apply_dsl">Áp dụng vào Trình soạn thảo</span>
+            </button>
+          </div>
+          <div id="dslOutputWrapper" class="hidden" style="margin-top: 12px;">
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Kết quả Query DSL:</div>
+            <div style="max-height: 250px; overflow: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-card);">
+              <pre style="margin: 0; padding: 10px; font-family: monospace; font-size: 12px; line-height: 1.4; color: var(--text);"><code id="dslGeneratedOutput"></code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monaco Editor AMD Loader with fallback support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
