@@ -17,11 +17,8 @@ import (
 	"eskhan/internal/api"
 	"eskhan/internal/config"
 	"eskhan/internal/storage"
+	"eskhan/internal/version"
 	"eskhan/web"
-)
-
-var (
-	version = "1.0.0"
 )
 
 func main() {
@@ -33,7 +30,13 @@ func main() {
 	flag.Parse()
 
 	if *versionFlag {
-		fmt.Printf("ESKhan v%s (Elasticsearch Query IDE)\n", version)
+		v := version.Get()
+		fmt.Printf("ESKhan %s (Elasticsearch Query IDE)\n", v.Version)
+		fmt.Printf("  Commit:    %s\n", v.Commit)
+		fmt.Printf("  Built At:  %s\n", v.BuildDate)
+		fmt.Printf("  Author:    %s\n", v.BuiltBy)
+		fmt.Printf("  Platform:  %s/%s\n", v.OS, v.Arch)
+		fmt.Printf("  Go:        %s\n", v.GoVersion)
 		os.Exit(0)
 	}
 
@@ -84,7 +87,7 @@ func main() {
 
 	go func() {
 		log.Printf("═══════════════════════════════════════════════════════")
-		log.Printf(" ⚡ ESKhan - Elasticsearch Query IDE v%s", version)
+		log.Printf(" ⚡ ESKhan - Elasticsearch Query IDE %s", version.Version)
 		log.Printf(" 🚀 Running at: %s", targetURL)
 		log.Printf(" ⌨️  Press Ctrl+C to stop")
 		log.Printf("═══════════════════════════════════════════════════════")

@@ -1,5 +1,10 @@
 # ⚡ ESKhan - Elasticsearch Pro Query IDE
 
+[![Release](https://img.shields.io/badge/version-v1.0.0-blue.svg)](https://github.com/Khan9Tran/eskhan)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Go Version](https://img.shields.io/badge/go-1.24+-00ADD8.svg)](https://golang.org)
+[![Author](https://img.shields.io/badge/Author-Khan9Tran-green.svg)](https://github.com/Khan9Tran)
+
 **ESKhan** là một công cụ IDE/Workbench trực quan, tốc độ cao được viết bằng **Golang**, chuyên dụng để truy vấn và làm việc với **Elasticsearch (tương thích hoàn hảo 7.x, 8.x và OpenSearch)**.
 
 Toàn bộ ứng dụng được đóng gói vào **1 file nhị phân duy nhất** (nhúng sẵn toàn bộ Web UI, Monaco Editor bằng `go:embed`). Khi khởi động, ESKhan sẽ tự động mở trình duyệt mặc định trên máy của bạn.
@@ -117,8 +122,17 @@ ESKhan9/
 │   ├── linter/                                # Query static linter & anti-pattern detection
 │   ├── schema/                                # Mapping parser & context autocomplete engine
 │   ├── storage/                               # Lưu trữ lịch sử query và snippets
+│   ├── version/                               # Quản lý version, build metadata, commit info
 │   └── api/                                   # REST API router & handlers
 └── web/
     ├── embed.go                               # go:embed nén giao diện vào binary
     └── dist/                                  # Frontend (HTML/CSS/JS, Monaco Editor, Charts, Tokenizer)
 ```
+
+---
+
+## 📜 Bản quyền (License) & Tác giả
+
+- **Tác giả**: [Khan9Tran](https://github.com/Khan9Tran)
+- Dự án được phát hành theo giấy phép mã nguồn mở **[MIT License](LICENSE)**. Toàn quyền sử dụng, sửa đổi và đóng gói miễn phí cho mục đích cá nhân lẫn thương mại.
+

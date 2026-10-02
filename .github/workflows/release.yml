@@ -1,0 +1,76 @@
+name: Release ESKhan Binaries
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build & Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+
+      - name: Run Tests
+        run: go test -v ./...
+
+      - name: Build Cross-Platform Binaries
+        id: build
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          COMMIT=$(git rev-parse --short HEAD)
+          BUILD_DATE=$(date -u +%Y-%m-%d)
+          AUTHOR="Khan9Tran"
+
+          LDFLAGS="-s -w \
+            -X 'eskhan/internal/version.Version=${TAG_NAME}' \
+            -X 'eskhan/internal/version.Commit=${COMMIT}' \
+            -X 'eskhan/internal/version.BuildDate=${BUILD_DATE}' \
+            -X 'eskhan/internal/version.BuiltBy=${AUTHOR}'"
+
+          mkdir -p release
+
+          # macOS ARM64
+          GOOS=darwin GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o release/eskhan-darwin-arm64 ./cmd/eskhan
+          tar -czvf "release/eskhan_${TAG_NAME}_darwin_arm64.tar.gz" -C release eskhan-darwin-arm64
+
+          # macOS AMD64
+          GOOS=darwin GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o release/eskhan-darwin-amd64 ./cmd/eskhan
+          tar -czvf "release/eskhan_${TAG_NAME}_darwin_amd64.tar.gz" -C release eskhan-darwin-amd64
+
+          # Linux AMD64
+          GOOS=linux GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o release/eskhan-linux-amd64 ./cmd/eskhan
+          tar -czvf "release/eskhan_${TAG_NAME}_linux_amd64.tar.gz" -C release eskhan-linux-amd64
+
+          # Windows AMD64
+          GOOS=windows GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o release/eskhan-windows-amd64.exe ./cmd/eskhan
+          cd release && zip "eskhan_${TAG_NAME}_windows_amd64.zip" eskhan-windows-amd64.exe && cd ..
+
+          # Generate SHA256 checksums
+          cd release
+          sha256sum *.tar.gz *.zip > checksums.txt
+          cd ..
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/*.tar.gz
+            release/*.zip
+            release/checksums.txt
+          generate_release_notes: true
+          draft: false
+          prerelease: false
