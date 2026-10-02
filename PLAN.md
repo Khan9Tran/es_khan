@@ -13,9 +13,9 @@ Dự án xây dựng công cụ giao diện trực quan cho Elasticsearch viết
 ## 2. Lộ trình triển khai (Roadmap)
 
 ### Giai đoạn 1: Thiết lập Skill & Quy chuẩn làm việc (ĐÃ HOÀN THÀNH ✅)
-- [x] Tạo [GEMINI.md](file:///Users/admin/GolandProjects/ESKhan9/GEMINI.md): Quy định vai trò Senior Architect, tiêu chuẩn code Go, quy chuẩn giao diện Dark Mode, và phương pháp kiểm thử.
-- [x] Tạo Skill [.agents/skills/es-workbench-expert/SKILL.md](file:///Users/admin/GolandProjects/ESKhan9/.agents/skills/es-workbench-expert/SKILL.md): Kỹ năng tương tác ES 7.x/8.x, trích xuất mapping và tối ưu DSL.
-- [x] Tạo Skill [.agents/skills/go-ui-app/SKILL.md](file:///Users/admin/GolandProjects/ESKhan9/.agents/skills/go-ui-app/SKILL.md): Kỹ năng nhúng Web UI, Monaco Editor, và phân phối Go binary.
+- [x] Tạo [GEMINI.md](GEMINI.md): Quy định vai trò Senior Architect, tiêu chuẩn code Go, quy chuẩn giao diện Dark Mode, và phương pháp kiểm thử.
+- [x] Tạo Skill [.agents/skills/es-workbench-expert/SKILL.md](.agents/skills/es-workbench-expert/SKILL.md): Kỹ năng tương tác ES 7.x/8.x, trích xuất mapping và tối ưu DSL.
+- [x] Tạo Skill [.agents/skills/go-ui-app/SKILL.md](.agents/skills/go-ui-app/SKILL.md): Kỹ năng nhúng Web UI, Monaco Editor, và phân phối Go binary.
 
 ### Giai đoạn 2: Xây dựng Backend Golang Core & Giao diện IDE Cơ bản (ĐÃ HOÀN THÀNH ✅)
 - [x] Khởi tạo module `go.mod`
@@ -24,7 +24,7 @@ Dự án xây dựng công cụ giao diện trực quan cho Elasticsearch viết
 - [x] Bộ phân tích Mapping & Autocomplete Schema (`internal/schema`)
 - [x] REST API Router (`internal/api`)
 - [x] Monaco Editor với autocomplete DSL, JSON Tree, Table view, CSV export, phím tắt `Cmd+Enter`
-- [x] Đóng gói vào 1 file nhị phân duy nhất [eskhan](file:///Users/admin/GolandProjects/ESKhan9/eskhan)
+- [x] Đóng gói vào 1 file nhị phân duy nhất `eskhan`
 
 ### Giai đoạn 3: Nâng cấp tính năng Premium & Thông minh (ĐÃ HOÀN THÀNH ✅)
 - [x] **Smart Query Linter & Anti-pattern Detector**: Phát hiện truy vấn chậm (wildcard ở đầu, must thay vì filter, size quá lớn, unindexed fielddata) kèm hướng dẫn tối ưu.
