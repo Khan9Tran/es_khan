@@ -169,7 +169,44 @@
     btnConvertGoToDSL: document.getElementById('btnConvertGoToDSL'),
     btnApplyDSLToEditor: document.getElementById('btnApplyDSLToEditor'),
     dslOutputWrapper: document.getElementById('dslOutputWrapper'),
-    dslGeneratedOutput: document.getElementById('dslGeneratedOutput')
+    dslGeneratedOutput: document.getElementById('dslGeneratedOutput'),
+
+    // v2: Mode Switcher & gRPC Studio
+    btnModeES: document.getElementById('btnModeES'),
+    btnModeGRPC: document.getElementById('btnModeGRPC'),
+    clusterSelectorContainer: document.getElementById('clusterSelectorContainer'),
+    esWorkspace: document.getElementById('esWorkspace'),
+    grpcWorkspace: document.getElementById('grpcWorkspace'),
+    grpcTargetInput: document.getElementById('grpcTargetInput'),
+    grpcPlaintextCheck: document.getElementById('grpcPlaintextCheck'),
+    grpcInsecureCheck: document.getElementById('grpcInsecureCheck'),
+    btnGrpcReflect: document.getElementById('btnGrpcReflect'),
+    btnOpenGrpcProtoModal: document.getElementById('btnOpenGrpcProtoModal'),
+    grpcServiceSelect: document.getElementById('grpcServiceSelect'),
+    grpcMethodSelect: document.getElementById('grpcMethodSelect'),
+    btnGrpcInvoke: document.getElementById('btnGrpcInvoke'),
+    btnGrpcFormatBody: document.getElementById('btnGrpcFormatBody'),
+    btnGrpcResetMock: document.getElementById('btnGrpcResetMock'),
+    grpcMonacoContainer: document.getElementById('grpcMonacoContainer'),
+    grpcMetaCount: document.getElementById('grpcMetaCount'),
+    grpcMetaTable: document.getElementById('grpcMetaTable'),
+    grpcMetaRows: document.getElementById('grpcMetaRows'),
+    btnAddMetaRow: document.getElementById('btnAddMetaRow'),
+    grpcTimeoutInput: document.getElementById('grpcTimeoutInput'),
+    grpcSplitResizer: document.getElementById('grpcSplitResizer'),
+    grpcStatusBadge: document.getElementById('grpcStatusBadge'),
+    grpcStatusDot: document.getElementById('grpcStatusDot'),
+    grpcStatusText: document.getElementById('grpcStatusText'),
+    grpcLatencyVal: document.getElementById('grpcLatencyVal'),
+    grpcSizeVal: document.getElementById('grpcSizeVal'),
+    btnCopyGrpcResponse: document.getElementById('btnCopyGrpcResponse'),
+    grpcRespMonacoContainer: document.getElementById('grpcRespMonacoContainer'),
+    grpcRespHeadersList: document.getElementById('grpcRespHeadersList'),
+    grpcProtoModal: document.getElementById('grpcProtoModal'),
+    btnCloseGrpcProtoModal: document.getElementById('btnCloseGrpcProtoModal'),
+    btnCancelGrpcProto: document.getElementById('btnCancelGrpcProto'),
+    grpcProtoInput: document.getElementById('grpcProtoInput'),
+    btnParseProtoSubmit: document.getElementById('btnParseProtoSubmit')
   };
 
   // --- Bilingual Localization (VI / EN) ---
@@ -2226,6 +2263,8 @@ func QueryMatchAll() ESQuery {
   // --- UI Event Listeners ---
 
   function setupEventListeners() {
+    setupGRPCEventListeners();
+
     // Cluster Selector Switch
     el.clusterSelect.addEventListener('change', async (e) => {
       const targetId = e.target.value;
@@ -2898,6 +2937,581 @@ func QueryMatchAll() ESQuery {
     } catch (e) {
       return raw;
     }
+  }
+
+  // ==========================================================================
+  // v2: gRPC Studio Controller & Dynamic Invoker Logic
+  // ==========================================================================
+
+  const grpcState = {
+    currentMode: 'es', // 'es' or 'grpc'
+    services: [],
+    selectedService: null,
+    selectedMethod: null,
+    editor: null,
+    respEditor: null,
+    isEditorInitialized: false
+  };
+
+  function switchStudioMode(mode) {
+    grpcState.currentMode = mode;
+    if (mode === 'es') {
+      if (el.btnModeES) el.btnModeES.classList.add('active');
+      if (el.btnModeGRPC) el.btnModeGRPC.classList.remove('active');
+      if (el.esWorkspace) el.esWorkspace.classList.remove('hidden');
+      if (el.grpcWorkspace) el.grpcWorkspace.classList.add('hidden');
+      if (el.clusterSelectorContainer) el.clusterSelectorContainer.classList.remove('hidden');
+      if (el.btnSafeMode) el.btnSafeMode.classList.remove('hidden');
+      if (el.btnAntigravity) el.btnAntigravity.classList.remove('hidden');
+      if (el.btnFormat) el.btnFormat.classList.remove('hidden');
+      if (el.btnSaveSnippetModal) el.btnSaveSnippetModal.classList.remove('hidden');
+      if (el.btnRunQuery) el.btnRunQuery.classList.remove('hidden');
+      if (state.editorInstance) {
+        setTimeout(() => state.editorInstance.layout(), 60);
+      }
+    } else if (mode === 'grpc') {
+      if (el.btnModeGRPC) el.btnModeGRPC.classList.add('active');
+      if (el.btnModeES) el.btnModeES.classList.remove('active');
+      if (el.grpcWorkspace) el.grpcWorkspace.classList.remove('hidden');
+      if (el.esWorkspace) el.esWorkspace.classList.add('hidden');
+      if (el.clusterSelectorContainer) el.clusterSelectorContainer.classList.add('hidden');
+      if (el.btnSafeMode) el.btnSafeMode.classList.add('hidden');
+      if (el.btnAntigravity) el.btnAntigravity.classList.add('hidden');
+      if (el.btnFormat) el.btnFormat.classList.add('hidden');
+      if (el.btnSaveSnippetModal) el.btnSaveSnippetModal.classList.add('hidden');
+      if (el.btnRunQuery) el.btnRunQuery.classList.add('hidden');
+
+      initGRPCMonaco();
+      setTimeout(() => {
+        if (grpcState.editor) grpcState.editor.layout();
+        if (grpcState.respEditor) grpcState.respEditor.layout();
+      }, 60);
+    }
+  }
+
+  function initGRPCMonaco() {
+    if (grpcState.isEditorInitialized || !state.isMonacoLoaded || !window.monaco) return;
+
+    const themeName = state.theme === 'light' ? 'vs' : 'vs-dark';
+
+    // Request Monaco Editor
+    if (el.grpcMonacoContainer) {
+      grpcState.editor = monaco.editor.create(el.grpcMonacoContainer, {
+        value: '{\n  \n}',
+        language: 'json',
+        theme: themeName,
+        automaticLayout: true,
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        fontSize: 13,
+        tabSize: 2,
+        renderLineHighlight: 'all',
+        formatOnPaste: true,
+        formatOnType: true
+      });
+
+      grpcState.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function () {
+        invokeGRPC();
+      });
+
+      grpcState.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyF, function () {
+        formatGRPCBody();
+      });
+    }
+
+    // Response Monaco Editor (Read-Only)
+    if (el.grpcRespMonacoContainer) {
+      grpcState.respEditor = monaco.editor.create(el.grpcRespMonacoContainer, {
+        value: '// Response will appear here after Invoke RPC',
+        language: 'json',
+        theme: themeName,
+        automaticLayout: true,
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        fontSize: 13,
+        tabSize: 2,
+        readOnly: true
+      });
+    }
+
+    grpcState.isEditorInitialized = true;
+  }
+
+  function formatGRPCBody() {
+    if (!grpcState.editor) return;
+    try {
+      const val = grpcState.editor.getValue();
+      if (!val.trim()) return;
+      const parsed = JSON.parse(val);
+      grpcState.editor.setValue(JSON.stringify(parsed, null, 2));
+    } catch (e) {
+      showToast('Lỗi format JSON: ' + e.message, 'warning');
+    }
+  }
+
+  function resetGRPCMock() {
+    if (!grpcState.selectedMethod) {
+      showToast('Chưa chọn Method để khôi phục Mock payload', 'warning');
+      return;
+    }
+    if (grpcState.editor && grpcState.selectedMethod.mock_request) {
+      grpcState.editor.setValue(grpcState.selectedMethod.mock_request);
+      showToast('Đã khôi phục Mock payload mẫu', 'info');
+    }
+  }
+
+  async function reflectGRPCServices() {
+    const target = el.grpcTargetInput.value.trim();
+    if (!target) {
+      showToast('Vui lòng nhập địa chỉ gRPC target (ví dụ: localhost:50051)', 'warning');
+      return;
+    }
+
+    const origBtnHtml = el.btnGrpcReflect.innerHTML;
+    el.btnGrpcReflect.disabled = true;
+    el.btnGrpcReflect.innerHTML = `<span class="spinner"></span> <span>Reflecting...</span>`;
+
+    try {
+      const res = await fetch('/api/grpc/reflect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          target: target,
+          plaintext: el.grpcPlaintextCheck.checked,
+          insecure_skip_verify: el.grpcInsecureCheck.checked
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Server Reflection failed');
+      }
+
+      grpcState.services = data.services || [];
+      populateGRPCServices(grpcState.services);
+      showToast(`Đã khám phá thành công ${grpcState.services.length} services!`, 'success');
+    } catch (err) {
+      showToast('gRPC Reflection error: ' + err.message, 'danger');
+    } finally {
+      el.btnGrpcReflect.disabled = false;
+      el.btnGrpcReflect.innerHTML = origBtnHtml;
+    }
+  }
+
+  function populateGRPCServices(services) {
+    if (!el.grpcServiceSelect) return;
+    el.grpcServiceSelect.innerHTML = '';
+    if (!services || services.length === 0) {
+      el.grpcServiceSelect.innerHTML = '<option value="">(No services found)</option>';
+      if (el.grpcMethodSelect) el.grpcMethodSelect.innerHTML = '<option value="">(No methods)</option>';
+      return;
+    }
+
+    services.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.name;
+      opt.textContent = s.name;
+      el.grpcServiceSelect.appendChild(opt);
+    });
+
+    onGRPCServiceChange();
+  }
+
+  function onGRPCServiceChange() {
+    const selectedSvcName = el.grpcServiceSelect.value;
+    const svc = grpcState.services.find(s => s.name === selectedSvcName);
+    grpcState.selectedService = svc || null;
+
+    if (!el.grpcMethodSelect) return;
+    el.grpcMethodSelect.innerHTML = '';
+    if (!svc || !svc.methods || svc.methods.length === 0) {
+      el.grpcMethodSelect.innerHTML = '<option value="">(No methods available)</option>';
+      return;
+    }
+
+    svc.methods.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.name;
+      opt.textContent = `${m.name} (${m.input_type.split('.').pop()} → ${m.output_type.split('.').pop()})`;
+      el.grpcMethodSelect.appendChild(opt);
+    });
+
+    onGRPCMethodChange();
+  }
+
+  function onGRPCMethodChange() {
+    if (!grpcState.selectedService || !el.grpcMethodSelect) return;
+    const methodName = el.grpcMethodSelect.value;
+    const m = (grpcState.selectedService.methods || []).find(method => method.name === methodName);
+    grpcState.selectedMethod = m || null;
+
+    if (m && m.mock_request && grpcState.editor) {
+      grpcState.editor.setValue(m.mock_request);
+    }
+  }
+
+  async function invokeGRPC() {
+    const target = el.grpcTargetInput ? el.grpcTargetInput.value.trim() : '';
+    const service = el.grpcServiceSelect ? el.grpcServiceSelect.value : '';
+    const method = el.grpcMethodSelect ? el.grpcMethodSelect.value : '';
+
+    if (!target) {
+      showToast('Target host:port cannot be empty', 'warning');
+      return;
+    }
+    if (!service || !method) {
+      showToast('Please select a Service and Method first', 'warning');
+      return;
+    }
+
+    let bodyStr = '{}';
+    if (grpcState.editor) {
+      bodyStr = grpcState.editor.getValue();
+    }
+
+    // Collect metadata
+    const metadata = {};
+    if (el.grpcMetaRows) {
+      const rows = el.grpcMetaRows.querySelectorAll('tr');
+      rows.forEach(tr => {
+        const keyInput = tr.querySelector('.meta-key-input');
+        const valInput = tr.querySelector('.meta-val-input');
+        if (keyInput && valInput && keyInput.value.trim()) {
+          metadata[keyInput.value.trim()] = valInput.value.trim();
+        }
+      });
+    }
+
+    const timeoutMs = parseInt(el.grpcTimeoutInput ? el.grpcTimeoutInput.value : 10000) || 10000;
+
+    // UI updating
+    if (el.grpcStatusBadge) el.grpcStatusBadge.className = 'grpc-status-badge';
+    if (el.grpcStatusDot) el.grpcStatusDot.className = 'status-dot dot-yellow';
+    if (el.grpcStatusText) el.grpcStatusText.textContent = 'Invoking...';
+    if (el.grpcLatencyVal) el.grpcLatencyVal.textContent = '...';
+    if (el.grpcSizeVal) el.grpcSizeVal.textContent = '...';
+    if (el.btnGrpcInvoke) el.btnGrpcInvoke.disabled = true;
+
+    try {
+      const res = await fetch('/api/grpc/invoke', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          target: target,
+          plaintext: el.grpcPlaintextCheck ? el.grpcPlaintextCheck.checked : true,
+          insecure_skip_verify: el.grpcInsecureCheck ? el.grpcInsecureCheck.checked : false,
+          service: service,
+          method: method,
+          body: bodyStr,
+          metadata: metadata,
+          timeout_ms: timeoutMs
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Invoke request failed');
+      }
+
+      if (data.status_code === 'OK') {
+        if (el.grpcStatusBadge) el.grpcStatusBadge.className = 'grpc-status-badge status-ok';
+        if (el.grpcStatusDot) el.grpcStatusDot.className = 'status-dot dot-green';
+        if (el.grpcStatusText) el.grpcStatusText.textContent = 'OK (0)';
+      } else {
+        if (el.grpcStatusBadge) el.grpcStatusBadge.className = 'grpc-status-badge status-error';
+        if (el.grpcStatusDot) el.grpcStatusDot.className = 'status-dot dot-red';
+        if (el.grpcStatusText) el.grpcStatusText.textContent = `${data.status_code} (${data.code}): ${data.message || ''}`;
+      }
+
+      if (el.grpcLatencyVal) el.grpcLatencyVal.textContent = `${data.took_ms} ms`;
+      const sizeBytes = data.raw_json ? new Blob([data.raw_json]).size : 0;
+      if (el.grpcSizeVal) {
+        el.grpcSizeVal.textContent = sizeBytes > 1024 ? `${(sizeBytes / 1024).toFixed(1)} KB` : `${sizeBytes} B`;
+      }
+
+      if (grpcState.respEditor) {
+        if (data.raw_json) {
+          grpcState.respEditor.setValue(data.raw_json);
+        } else if (data.message) {
+          grpcState.respEditor.setValue(`// Status: ${data.status_code}\n// Code: ${data.code}\n// Message: ${data.message}`);
+        } else {
+          grpcState.respEditor.setValue(JSON.stringify(data, null, 2));
+        }
+      }
+
+      renderGRPCHeaders(data.headers, data.trailers);
+    } catch (err) {
+      if (el.grpcStatusBadge) el.grpcStatusBadge.className = 'grpc-status-badge status-error';
+      if (el.grpcStatusDot) el.grpcStatusDot.className = 'status-dot dot-red';
+      if (el.grpcStatusText) el.grpcStatusText.textContent = 'Error: ' + err.message;
+      if (grpcState.respEditor) {
+        grpcState.respEditor.setValue(`// Error invoking RPC:\n${err.message}`);
+      }
+      showToast('Invoke error: ' + err.message, 'danger');
+    } finally {
+      if (el.btnGrpcInvoke) el.btnGrpcInvoke.disabled = false;
+    }
+  }
+
+  function renderGRPCHeaders(headers, trailers) {
+    if (!el.grpcRespHeadersList) return;
+    el.grpcRespHeadersList.innerHTML = '';
+    const hasHeaders = headers && Object.keys(headers).length > 0;
+    const hasTrailers = trailers && Object.keys(trailers).length > 0;
+
+    if (!hasHeaders && !hasTrailers) {
+      el.grpcRespHeadersList.innerHTML = '<div class="empty-state">No headers or trailers returned</div>';
+      return;
+    }
+
+    if (hasHeaders) {
+      const headerTitle = document.createElement('div');
+      headerTitle.style.fontWeight = 'bold';
+      headerTitle.style.marginBottom = '6px';
+      headerTitle.style.color = 'var(--text-main)';
+      headerTitle.textContent = 'Response Headers:';
+      el.grpcRespHeadersList.appendChild(headerTitle);
+
+      for (const [k, v] of Object.entries(headers)) {
+        const row = document.createElement('div');
+        row.className = 'grpc-header-item';
+        row.innerHTML = `<span class="grpc-header-key">${escapeHtml(k)}:</span> <span class="grpc-header-val">${escapeHtml(Array.isArray(v) ? v.join(', ') : v)}</span>`;
+        el.grpcRespHeadersList.appendChild(row);
+      }
+    }
+
+    if (hasTrailers) {
+      const trailerTitle = document.createElement('div');
+      trailerTitle.style.fontWeight = 'bold';
+      trailerTitle.style.marginTop = '12px';
+      trailerTitle.style.marginBottom = '6px';
+      trailerTitle.style.color = 'var(--text-main)';
+      trailerTitle.textContent = 'Response Trailers:';
+      el.grpcRespHeadersList.appendChild(trailerTitle);
+
+      for (const [k, v] of Object.entries(trailers)) {
+        const row = document.createElement('div');
+        row.className = 'grpc-header-item';
+        row.innerHTML = `<span class="grpc-header-key">${escapeHtml(k)}:</span> <span class="grpc-header-val">${escapeHtml(Array.isArray(v) ? v.join(', ') : v)}</span>`;
+        el.grpcRespHeadersList.appendChild(row);
+      }
+    }
+  }
+
+  function addGRPCMetaRow(key = '', val = '') {
+    if (!el.grpcMetaRows) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" class="meta-key-input" placeholder="e.g. authorization" value="${escapeHtml(key)}"></td>
+      <td><input type="text" class="meta-val-input" placeholder="e.g. Bearer token" value="${escapeHtml(val)}"></td>
+      <td style="text-align:center;"><button type="button" class="btn btn-xs btn-danger btn-del-meta" title="Remove Header">&times;</button></td>
+    `;
+    tr.querySelector('.btn-del-meta').addEventListener('click', () => {
+      tr.remove();
+      updateGRPCMetaCount();
+    });
+    tr.querySelectorAll('input').forEach(inp => {
+      inp.addEventListener('input', updateGRPCMetaCount);
+    });
+    el.grpcMetaRows.appendChild(tr);
+    updateGRPCMetaCount();
+  }
+
+  function updateGRPCMetaCount() {
+    if (!el.grpcMetaRows || !el.grpcMetaCount) return;
+    let count = 0;
+    el.grpcMetaRows.querySelectorAll('tr').forEach(tr => {
+      const k = tr.querySelector('.meta-key-input');
+      if (k && k.value.trim()) count++;
+    });
+    el.grpcMetaCount.textContent = count;
+  }
+
+  function copyGRPCResponse() {
+    if (!grpcState.respEditor) return;
+    const text = grpcState.respEditor.getValue();
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('Đã copy Response JSON vào clipboard!', 'success');
+    }).catch(err => {
+      showToast('Lỗi copy: ' + err.message, 'danger');
+    });
+  }
+
+  function openGrpcProtoModal() {
+    if (el.grpcProtoModal) el.grpcProtoModal.classList.remove('hidden');
+  }
+
+  function closeGrpcProtoModal() {
+    if (el.grpcProtoModal) el.grpcProtoModal.classList.add('hidden');
+  }
+
+  async function parseProtoDefinition() {
+    const content = el.grpcProtoInput ? el.grpcProtoInput.value.trim() : '';
+    if (!content) {
+      showToast('Vui lòng nhập nội dung file .proto', 'warning');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/grpc/proto/parse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: content })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to parse proto content');
+      }
+
+      grpcState.services = data.services || [];
+      populateGRPCServices(grpcState.services);
+      closeGrpcProtoModal();
+      showToast(`Đã nạp thành công ${grpcState.services.length} services từ .proto!`, 'success');
+    } catch (err) {
+      showToast('Parse proto error: ' + err.message, 'danger');
+    }
+  }
+
+  function setupGRPCResizer() {
+    if (!el.grpcSplitResizer) return;
+    let isDragging = false;
+    let startX = 0;
+    let startLeftWidth = 0;
+
+    const reqPane = document.querySelector('.grpc-req-pane');
+
+    el.grpcSplitResizer.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startX = e.clientX;
+      startLeftWidth = reqPane ? reqPane.getBoundingClientRect().width : 400;
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging || !reqPane) return;
+      const dx = e.clientX - startX;
+      const newWidth = Math.max(280, Math.min(window.innerWidth - 300, startLeftWidth + dx));
+      reqPane.style.flex = `0 0 ${newWidth}px`;
+      if (grpcState.editor) grpcState.editor.layout();
+      if (grpcState.respEditor) grpcState.respEditor.layout();
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        if (grpcState.editor) grpcState.editor.layout();
+        if (grpcState.respEditor) grpcState.respEditor.layout();
+      }
+    });
+  }
+
+  function setupGRPCEventListeners() {
+    // Mode Switcher buttons
+    if (el.btnModeES) {
+      el.btnModeES.addEventListener('click', () => switchStudioMode('es'));
+    }
+    if (el.btnModeGRPC) {
+      el.btnModeGRPC.addEventListener('click', () => switchStudioMode('grpc'));
+    }
+
+    // Reflect
+    if (el.btnGrpcReflect) {
+      el.btnGrpcReflect.addEventListener('click', reflectGRPCServices);
+    }
+
+    // Service & Method change
+    if (el.grpcServiceSelect) {
+      el.grpcServiceSelect.addEventListener('change', onGRPCServiceChange);
+    }
+    if (el.grpcMethodSelect) {
+      el.grpcMethodSelect.addEventListener('change', onGRPCMethodChange);
+    }
+
+    // Invoke
+    if (el.btnGrpcInvoke) {
+      el.btnGrpcInvoke.addEventListener('click', invokeGRPC);
+    }
+
+    // Body actions
+    if (el.btnGrpcFormatBody) {
+      el.btnGrpcFormatBody.addEventListener('click', formatGRPCBody);
+    }
+    if (el.btnGrpcResetMock) {
+      el.btnGrpcResetMock.addEventListener('click', resetGRPCMock);
+    }
+
+    // Copy Response
+    if (el.btnCopyGrpcResponse) {
+      el.btnCopyGrpcResponse.addEventListener('click', copyGRPCResponse);
+    }
+
+    // Metadata
+    if (el.btnAddMetaRow) {
+      el.btnAddMetaRow.addEventListener('click', () => addGRPCMetaRow());
+    }
+
+    // Proto Modal
+    if (el.btnOpenGrpcProtoModal) {
+      el.btnOpenGrpcProtoModal.addEventListener('click', openGrpcProtoModal);
+    }
+    if (el.btnCloseGrpcProtoModal) {
+      el.btnCloseGrpcProtoModal.addEventListener('click', closeGrpcProtoModal);
+    }
+    if (el.btnCancelGrpcProto) {
+      el.btnCancelGrpcProto.addEventListener('click', closeGrpcProtoModal);
+    }
+    if (el.btnParseProtoSubmit) {
+      el.btnParseProtoSubmit.addEventListener('click', parseProtoDefinition);
+    }
+
+    // Request tabs
+    document.querySelectorAll('.grpc-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.grpc-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.grpc-tab-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        const targetId = tab.getAttribute('data-tab');
+        const panel = document.getElementById(targetId);
+        if (panel) panel.classList.add('active');
+        if (targetId === 'grpc-tab-body' && grpcState.editor) {
+          setTimeout(() => grpcState.editor.layout(), 30);
+        }
+      });
+    });
+
+    // Response tabs
+    document.querySelectorAll('.grpc-resp-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.grpc-resp-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.grpc-resp-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        const targetId = tab.getAttribute('data-tab');
+        const panel = document.getElementById(targetId);
+        if (panel) panel.classList.add('active');
+        if (targetId === 'grpc-resp-tab-body' && grpcState.respEditor) {
+          setTimeout(() => grpcState.respEditor.layout(), 30);
+        }
+      });
+    });
+
+    // Setup Resizer
+    setupGRPCResizer();
+
+    // Default metadata row
+    addGRPCMetaRow('authorization', '');
+
+    // Global Keydown hook (Cmd+Enter or Ctrl+Enter)
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        if (grpcState.currentMode === 'grpc') {
+          e.preventDefault();
+          invokeGRPC();
+        }
+      }
+    });
   }
 
   document.addEventListener('DOMContentLoaded', init);

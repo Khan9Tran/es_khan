@@ -1486,3 +1486,394 @@ mark.es-hl {
   max-height: 60vh;
   overflow-y: auto;
 }
+
+/* ==========================================================================
+   v2: Mode Switcher & gRPC Studio Styles
+   ========================================================================== */
+
+.mode-switcher-container {
+  display: flex;
+  align-items: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+  margin-left: 12px;
+  margin-right: 8px;
+}
+
+.btn-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-mode:hover {
+  color: var(--text-main);
+  background: var(--bg-active);
+}
+
+.btn-mode.active {
+  color: #ffffff;
+  background: var(--accent);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+body.theme-light .btn-mode.active {
+  color: #ffffff;
+  background: var(--accent);
+}
+
+.badge-v2 {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 10px;
+  background: #ec4899;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* gRPC Workspace */
+.grpc-workspace {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 48px);
+  background: var(--bg-main);
+  overflow: hidden;
+}
+
+.grpc-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.grpc-target-group {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 440px;
+}
+
+.grpc-proto-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 8px;
+  border-radius: 4px 0 0 4px;
+  background: #6366f1;
+  color: #ffffff;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.grpc-target-input {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-left: none !important;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  flex: 1;
+}
+
+.grpc-options-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.grpc-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.grpc-toggle-label input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.grpc-rpc-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 16px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.grpc-select-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.grpc-bar-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.grpc-select {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.grpc-rpc-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* gRPC Workbench Split */
+.grpc-workbench-split {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.grpc-pane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.grpc-req-pane {
+  flex: 1;
+  border-right: 1px solid var(--border);
+  min-width: 320px;
+}
+
+.grpc-resp-pane {
+  flex: 1;
+  min-width: 320px;
+  background: var(--bg-surface);
+}
+
+.grpc-split-resizer {
+  width: 4px;
+  cursor: col-resize;
+  background: var(--border);
+  transition: background 0.15s ease;
+}
+
+.grpc-split-resizer:hover {
+  background: var(--accent);
+}
+
+.grpc-pane-tabs-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.grpc-pane-tabs {
+  display: flex;
+  gap: 4px;
+  height: 100%;
+}
+
+.grpc-tab, .grpc-resp-tab {
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease;
+}
+
+.grpc-tab:hover, .grpc-resp-tab:hover {
+  color: var(--text-main);
+}
+
+.grpc-tab.active, .grpc-resp-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+.grpc-tab-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.grpc-tab-panel, .grpc-resp-panel {
+  display: none;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.grpc-tab-panel.active, .grpc-resp-panel.active {
+  display: flex;
+  flex-direction: column;
+}
+
+.grpc-editor-frame {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.grpc-meta-editor {
+  padding: 14px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.keyvalue-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.keyvalue-table th {
+  text-align: left;
+  padding: 6px 8px;
+  color: var(--text-muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+
+.keyvalue-table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.keyvalue-table input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.keyvalue-table input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.grpc-settings-form {
+  padding: 16px;
+}
+
+.grpc-resp-metrics-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 14px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  height: 36px;
+}
+
+.grpc-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+}
+
+.grpc-status-badge.status-ok {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.grpc-status-badge.status-error {
+  background: rgba(244, 63, 94, 0.15);
+  color: #f43f5e;
+}
+
+.grpc-metric {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.grpc-metric .metric-value {
+  color: var(--text-main);
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
+.grpc-headers-list {
+  padding: 12px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.grpc-header-item {
+  display: flex;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-light);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  gap: 10px;
+}
+
+.grpc-header-key {
+  color: var(--accent);
+  min-width: 160px;
+  font-weight: 600;
+}
+
+.grpc-header-val {
+  color: var(--text-secondary);
+  word-break: break-all;
+}
+

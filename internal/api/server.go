@@ -131,6 +131,11 @@ func (s *Server) setupRoutes() {
 		r.Get("/snippets", s.handleGetSnippets)
 		r.Post("/snippets", s.handleSaveSnippet)
 		r.Delete("/snippets/{id}", s.handleDeleteSnippet)
+
+		// gRPC Studio (v2)
+		r.Post("/grpc/reflect", s.handleGRPCReflect)
+		r.Post("/grpc/invoke", s.handleGRPCInvoke)
+		r.Post("/grpc/proto/parse", s.handleGRPCParseProto)
 	})
 
 	// Static Web UI assets

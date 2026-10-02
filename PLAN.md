@@ -1,37 +1,82 @@
-# Kế hoạch phát triển ESKhan (Elasticsearch Query IDE)
+# Kế hoạch phát triển ESKhan (Elasticsearch & Universal API IDE)
 
-Dự án xây dựng công cụ giao diện trực quan cho Elasticsearch viết bằng Golang, tập trung vào trải nghiệm lập trình viên (Developer Experience), tốc độ cao và hỗ trợ gợi ý thông minh (Smart Autocomplete).
-
----
-
-## 1. Trọng tâm tương thích Elasticsearch
-- **Phiên bản mục tiêu chính**: Elasticsearch 7.x.
-- **Khả năng tương thích mở rộng**: Tương thích hoàn toàn với Elasticsearch 8.x và OpenSearch (hỗ trợ HTTPS/TLS tự ký, Basic Auth, API Key, parse linh hoạt response `hits.total` dạng số hoặc object).
+Dự án xây dựng công cụ giao diện trực quan tất-cả-trong-một cho Developer viết bằng Golang:
+- **Elasticsearch Workbench**: Tương thích ES 7.x, 8.x, OpenSearch, smart autocomplete, visual charts, linter.
+- **gRPC Studio**: Dynamic protobuf invoker, Server Reflection, proto import, siêu nhẹ & mượt.
+- **REST & Swagger Studio**: Postman-like client, proxy Go bypass CORS, import Swagger URL / OpenAPI v2-v3.
 
 ---
 
-## 2. Lộ trình triển khai (Roadmap)
+## 🌟 Lộ trình Version 1 (ĐÃ HOÀN THÀNH ✅)
+- [x] **Giai đoạn 1**: Thiết lập Skill & Quy chuẩn làm việc ([GEMINI.md](GEMINI.md)).
+- [x] **Giai đoạn 2**: Backend Golang Core & Giao diện IDE Cơ bản (ES 7.x/8.x/OpenSearch, Monaco Editor, CSV export).
+- [x] **Giai đoạn 3**: Tính năng Premium (Linter, Context-Aware Autocomplete, Top Terms, Visual Charts, Analyzer Playground, Document CRUD, Safe Mode, Variables, Index Maintenance).
 
-### Giai đoạn 1: Thiết lập Skill & Quy chuẩn làm việc (ĐÃ HOÀN THÀNH ✅)
-- [x] Tạo [GEMINI.md](GEMINI.md): Quy định vai trò Senior Architect, tiêu chuẩn code Go, quy chuẩn giao diện Dark Mode, và phương pháp kiểm thử.
-- [x] Tạo Skill [.agents/skills/es-workbench-expert/SKILL.md](.agents/skills/es-workbench-expert/SKILL.md): Kỹ năng tương tác ES 7.x/8.x, trích xuất mapping và tối ưu DSL.
-- [x] Tạo Skill [.agents/skills/go-ui-app/SKILL.md](.agents/skills/go-ui-app/SKILL.md): Kỹ năng nhúng Web UI, Monaco Editor, và phân phối Go binary.
+---
 
-### Giai đoạn 2: Xây dựng Backend Golang Core & Giao diện IDE Cơ bản (ĐÃ HOÀN THÀNH ✅)
-- [x] Khởi tạo module `go.mod`
-- [x] Cấu hình lưu trữ cục bộ: profile kết nối, lịch sử query, snippets (`internal/config`, `internal/storage`)
-- [x] Client tương thích ES 7.x/8.x/OpenSearch (`internal/es`): Ping, health, raw query, metrics
-- [x] Bộ phân tích Mapping & Autocomplete Schema (`internal/schema`)
-- [x] REST API Router (`internal/api`)
-- [x] Monaco Editor với autocomplete DSL, JSON Tree, Table view, CSV export, phím tắt `Cmd+Enter`
-- [x] Đóng gói vào 1 file nhị phân duy nhất `eskhan`
+## 🚀 Lộ trình Version 2 (Universal Developer Studio)
 
-### Giai đoạn 3: Nâng cấp tính năng Premium & Thông minh (ĐÃ HOÀN THÀNH ✅)
-- [x] **Smart Query Linter & Anti-pattern Detector**: Phát hiện truy vấn chậm (wildcard ở đầu, must thay vì filter, size quá lớn, unindexed fielddata) kèm hướng dẫn tối ưu.
-- [x] **Context-Aware Autocomplete & Top Terms**: Gợi ý trường theo ngữ cảnh (`range` chỉ hiện ngày/số, `terms` hiện keyword) và tự động nạp các giá trị mẫu thực tế từ index.
-- [x] **Visual Aggregations Chart**: Tự động vẽ biểu đồ trực quan (Interactive Bar Chart) khi query có `aggregations`.
-- [x] **Analyzer & Tokenizer Playground (`_analyze`)**: Trực quan hóa luồng phân tích từ (tokens ribbon, offsets, types) của các bộ phân tích tiếng Việt/tiếng Anh.
-- [x] **Document CRUD & Inspector**: Xem chi tiết document dạng drawer, chỉnh sửa hoặc xóa document trực tiếp từ bảng kết quả.
-- [x] **Safe Mode (Read-Only Toggle)**: Nút gạt an toàn bảo vệ dữ liệu Production khỏi việc sửa/xóa nhầm.
-- [x] **Biến môi trường & Tham số hóa**: Hỗ trợ cú pháp `{{variable}}`, `{{$timestamp}}`, `{{$uuid}}`, `{{$date}}`.
-- [x] **Index Maintenance Hub**: Các thao tác nhanh trên Sidebar (`_refresh`, `_flush`, `_cache/clear`).
+### 📌 Giai đoạn 1 (ƯU TIÊN HÀNG ĐẦU): gRPC Client Engine & Dynamic Invoker (ĐÃ HOÀN THÀNH ✅)
+*Mục tiêu: Gọi gRPC siêu mượt bằng Go core, không cần cài protoc, không cần BloomRPC/Postman.*
+- [x] **1.1. gRPC Reflection & Discovery (`internal/grpcclient`)**:
+  - Hỗ trợ gRPC Server Reflection Protocol (`v1` và `v1alpha`).
+  - Tự động scan và liệt kê toàn bộ Packages, Services, Methods (RPCs).
+  - Trích xuất Protobuf Descriptors của Request/Response messages.
+- [x] **1.2. Dynamic Protobuf & Mock JSON Generator**:
+  - Tự động sinh JSON mẫu (Mock payload) từ Message Descriptor (chuẩn hóa types: string, number, bool, enum, nested message, repeated array).
+  - Parser 2 chiều: JSON (từ Monaco Editor) ➔ Protobuf Binary (để gửi đi) và Protobuf Binary ➔ JSON (để hiển thị).
+- [x] **1.3. Dynamic Invoker & Connection Manager**:
+  - Hỗ trợ kết nối **Plaintext (Insecure)** và **TLS** (kèm cờ `InsecureSkipVerify`).
+  - Gửi gRPC Metadata (Headers, Authorization Bearer, Custom keys).
+  - Thực thi **Unary RPC** với timeout và context cancellation.
+  - Đo thời gian thực thi (Latency / Took ms).
+- [x] **1.4. Proto File Import (Fallback khi server tắt reflection)**:
+  - Cho phép người dùng upload / nạp nội dung file `.proto` để parse descriptors động (`internal/grpcclient/proto_parser.go`).
+- [x] **1.5. REST API Endpoints Backend**:
+  - `POST /api/grpc/reflect`: Khám phá services & methods từ gRPC target.
+  - `POST /api/grpc/invoke`: Gọi RPC method động với JSON body và metadata.
+  - `POST /api/grpc/proto/parse`: Parse trực tiếp chuỗi `.proto` sang services & mock payloads.
+- [x] **1.6. Giao diện gRPC Studio trên Web**:
+  - Mode Switcher trên Header: **⚡ ES Workbench** ⟷ **🔌 gRPC Studio**.
+  - Thanh chọn Target (host:port, Plaintext, Insecure TLS), Service & Method selector.
+  - Tabs Request: Monaco JSON Request Editor, Metadata Key-Value Editor, Settings (timeout ms).
+  - Tabs Response: Monaco Read-Only JSON Viewer, Headers & Trailers viewer, Status Code Badge, Latency & Payload size.
+  - Phím tắt `Cmd+Enter` / `Ctrl+Enter` để Invoke RPC; `Cmd+Shift+F` để format JSON.
+  - Modal Import `.proto` linh hoạt.
+- [x] **1.7. Automated Unit Tests & Mock gRPC Server**:
+  - Kiểm thử Server Reflection, Unary Invocation, Input Validation, và Proto Parser (`internal/grpcclient/client_test.go` & `internal/api/grpc_handlers_test.go`).
+
+---
+
+### 📌 Giai đoạn 2: REST HTTP Client Engine & Proxy Backend
+*Mục tiêu: Động cơ gửi HTTP request đa năng, giải quyết 100% lỗi CORS của trình duyệt.*
+- [ ] Package [`internal/httpclient`](internal/httpclient): Đầy đủ methods (`GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`).
+- [ ] Headers, Query Params, Request Body (JSON, Form-data, x-www-form-urlencoded, Raw).
+- [ ] Đo đạc chi tiết chỉ số mạng qua `net/http/httptrace` (DNS, TCP, TLS, TTFB, Total Duration).
+- [ ] API endpoint: `POST /api/http/send`.
+- [ ] Unit test cho HTTP engine.
+
+---
+
+### 📌 Giai đoạn 3: OpenAPI & Swagger Parser & Explorer
+*Mục tiêu: 1-click test API từ tài liệu Swagger.*
+- [ ] Package [`internal/openapi`](internal/openapi): Fetch URL Swagger hoặc parse file JSON/YAML (hỗ trợ Swagger 2.0, OpenAPI 3.0/3.1).
+- [ ] Tự động trích xuất endpoints, tags, parameters, và tự động tạo Mock JSON Body từ Schema.
+- [ ] UI Swagger Explorer: Cây danh mục API, tìm kiếm, nút "⚡ Open in Tab" để đẩy sang API Client.
+- [ ] Unit test cho Swagger/OpenAPI parser.
+
+---
+
+### 📌 Giai đoạn 4: Giao diện IDE Hợp nhất (Multi-Protocol Studio)
+*Mục tiêu: Trải nghiệm mượt mà, chuyển đổi tức thì giữa các phân hệ.*
+- [ ] Sidebar Mode Switcher: 🔍 **Elasticsearch** | 🔌 **gRPC Studio** | 🌐 **REST/Swagger**.
+- [ ] Multi-tab engine: Mở đồng thời các Tab ES Query, Tab gRPC Call, Tab REST Request.
+- [ ] Tối ưu hóa UI Dark Mode, phím tắt thống nhất (`Cmd+Enter` / `Ctrl+Enter` để thực thi).
+
+---
+
+### 📌 Giai đoạn 5: Collections, Biến môi trường & Đóng gói Phân phối
+*Mục tiêu: Hoàn thiện tính năng tiện ích hàng ngày và phát hành.*
+- [ ] Lưu trữ Collections & History chung cho cả ES, gRPC và REST.
+- [ ] Environment Manager (`{{base_url}}`, `{{grpc_host}}`, `{{token}}`, `{{$timestamp}}`, `{{$uuid}}`).
+- [ ] Chạy toàn bộ test suite (`go test ./...`) và build cross-platform binaries.

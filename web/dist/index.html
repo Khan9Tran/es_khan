@@ -18,11 +18,29 @@
           </svg>
         </div>
         <span class="logo-title">ESKhan</span>
-        <span class="logo-tag">9</span>
+        <span class="logo-tag">v2</span>
+      </div>
+
+      <!-- Mode Switcher (v2) -->
+      <div class="mode-switcher-container">
+        <button id="btnModeES" class="btn-mode active" title="Elasticsearch Query Workbench">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span>ES Workbench</span>
+        </button>
+        <button id="btnModeGRPC" class="btn-mode" title="gRPC Studio & Dynamic Invoker">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 2v3m0 14v3M2 12h3m14 0h3m-3.5-6.5l-2 2m-7 7l-2 2m0-11l2 2m7 7l2 2"></path>
+          </svg>
+          <span>gRPC Studio</span>
+          <span class="badge-v2">v2</span>
+        </button>
       </div>
 
       <!-- Cluster Selector -->
-      <div class="cluster-selector-container">
+      <div class="cluster-selector-container" id="clusterSelectorContainer">
         <div class="cluster-status-badge" id="clusterStatusBadge" title="Cluster Health">
           <span class="status-dot dot-gray"></span>
           <span id="clusterStatusText">Connecting...</span>
@@ -122,7 +140,7 @@
   </header>
 
   <!-- Main Workspace Layout -->
-  <div class="main-layout">
+  <div class="main-layout" id="esWorkspace">
     <!-- Left Navigation / Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-tabs">
@@ -439,6 +457,162 @@
         </div>
       </section>
     </main>
+  </div>
+
+  <!-- gRPC Studio Workspace (v2) -->
+  <div class="grpc-workspace hidden" id="grpcWorkspace">
+    <!-- Top gRPC Bar -->
+    <div class="grpc-topbar">
+      <div class="grpc-target-group">
+        <span class="grpc-proto-badge">gRPC</span>
+        <input type="text" id="grpcTargetInput" class="form-input grpc-target-input" placeholder="host:port (e.g. localhost:50051)" value="localhost:50051">
+      </div>
+
+      <div class="grpc-options-group">
+        <label class="grpc-toggle-label" title="Use Plaintext (Insecure HTTP/2)">
+          <input type="checkbox" id="grpcPlaintextCheck" checked>
+          <span>Plaintext</span>
+        </label>
+        <label class="grpc-toggle-label" title="Skip TLS Certificate Validation (for self-signed certs)">
+          <input type="checkbox" id="grpcInsecureCheck">
+          <span>Insecure TLS</span>
+        </label>
+      </div>
+
+      <button id="btnGrpcReflect" class="btn btn-secondary" title="Fetch Services & Methods via gRPC Server Reflection">
+        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <polyline points="1 20 1 14 7 14"></polyline>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+        <span>Reflect Services</span>
+      </button>
+
+      <button id="btnOpenGrpcProtoModal" class="btn btn-secondary" title="Import / Paste .proto definition">
+        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+        <span>Import .proto</span>
+      </button>
+    </div>
+
+    <!-- RPC Selection Bar -->
+    <div class="grpc-rpc-bar">
+      <div class="grpc-select-group">
+        <span class="grpc-bar-label">Service:</span>
+        <select id="grpcServiceSelect" class="form-select grpc-select">
+          <option value="">(Click Reflect Services or Import .proto)</option>
+        </select>
+      </div>
+
+      <div class="grpc-select-group">
+        <span class="grpc-bar-label">Method:</span>
+        <select id="grpcMethodSelect" class="form-select grpc-select">
+          <option value="">(Select service first)</option>
+        </select>
+      </div>
+
+      <div class="grpc-rpc-actions">
+        <button id="btnGrpcInvoke" class="btn btn-primary" title="Invoke gRPC Method (Cmd+Enter or Ctrl+Enter)">
+          <svg class="icon icon-play" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span>Invoke RPC</span>
+          <kbd class="shortcut-badge">⌘⏎</kbd>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Split: Request on Left, Response on Right -->
+    <div class="grpc-workbench-split">
+      <!-- Left: Request Configuration & Body -->
+      <div class="grpc-pane grpc-req-pane">
+        <div class="grpc-pane-tabs-bar">
+          <div class="grpc-pane-tabs">
+            <button class="grpc-tab active" data-tab="grpc-tab-body">JSON Request Body</button>
+            <button class="grpc-tab" data-tab="grpc-tab-meta">Metadata (<span id="grpcMetaCount">0</span>)</button>
+            <button class="grpc-tab" data-tab="grpc-tab-cfg">Settings</button>
+          </div>
+          <div class="grpc-tab-actions">
+            <button id="btnGrpcFormatBody" class="btn btn-xs btn-secondary" title="Format JSON (Cmd+Shift+F)">Format JSON</button>
+            <button id="btnGrpcResetMock" class="btn btn-xs btn-secondary" title="Reset to auto-generated Mock Payload">Reset Mock</button>
+          </div>
+        </div>
+
+        <div class="grpc-tab-panel active" id="grpc-tab-body">
+          <div id="grpcMonacoContainer" class="grpc-editor-frame"></div>
+        </div>
+
+        <div class="grpc-tab-panel" id="grpc-tab-meta">
+          <div class="grpc-meta-editor">
+            <table class="keyvalue-table" id="grpcMetaTable">
+              <thead>
+                <tr>
+                  <th style="width:42%">Key (e.g. authorization, x-user-id)</th>
+                  <th style="width:48%">Value (e.g. Bearer token_xyz)</th>
+                  <th style="width:10%"></th>
+                </tr>
+              </thead>
+              <tbody id="grpcMetaRows">
+                <!-- dynamic metadata rows -->
+              </tbody>
+            </table>
+            <button id="btnAddMetaRow" class="btn btn-xs btn-secondary" style="margin-top:8px;">+ Add Metadata Header</button>
+          </div>
+        </div>
+
+        <div class="grpc-tab-panel" id="grpc-tab-cfg">
+          <div class="grpc-settings-form">
+            <div class="form-group">
+              <label>Timeout (milliseconds):</label>
+              <input type="number" id="grpcTimeoutInput" class="form-input" value="10000" min="100" max="120000" style="width:200px;">
+              <small class="form-text text-muted" style="display:block; margin-top:4px;">Default is 10000ms (10 seconds).</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resizer / Divider -->
+      <div class="grpc-split-resizer" id="grpcSplitResizer"></div>
+
+      <!-- Right: Response Viewer -->
+      <div class="grpc-pane grpc-resp-pane">
+        <div class="grpc-resp-metrics-bar">
+          <div class="grpc-status-badge" id="grpcStatusBadge">
+            <span class="status-dot dot-gray" id="grpcStatusDot"></span>
+            <span id="grpcStatusText">Ready</span>
+          </div>
+          <div class="grpc-metric" id="grpcMetricLatency">
+            <span class="metric-label">Latency:</span>
+            <span class="metric-value" id="grpcLatencyVal">-</span>
+          </div>
+          <div class="grpc-metric" id="grpcMetricSize">
+            <span class="metric-label">Size:</span>
+            <span class="metric-value" id="grpcSizeVal">-</span>
+          </div>
+          <div style="flex:1"></div>
+          <button id="btnCopyGrpcResponse" class="btn btn-xs btn-secondary" title="Copy Response JSON">Copy JSON</button>
+        </div>
+
+        <div class="grpc-pane-tabs-bar">
+          <div class="grpc-pane-tabs">
+            <button class="grpc-resp-tab active" data-tab="grpc-resp-tab-body">Response JSON</button>
+            <button class="grpc-resp-tab" data-tab="grpc-resp-tab-headers">Headers & Trailers</button>
+          </div>
+        </div>
+
+        <div class="grpc-resp-panel active" id="grpc-resp-tab-body">
+          <div id="grpcRespMonacoContainer" class="grpc-editor-frame"></div>
+        </div>
+
+        <div class="grpc-resp-panel" id="grpc-resp-tab-headers">
+          <div class="grpc-headers-list" id="grpcRespHeadersList">
+            <div class="empty-state">No headers or trailers received yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Drawer: Document Inspector & Quick Editor -->
@@ -800,6 +974,33 @@
               <pre style="margin: 0; padding: 10px; font-family: monospace; font-size: 12px; line-height: 1.4; color: var(--text);"><code id="dslGeneratedOutput"></code></pre>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  <!-- Modal: Import .proto (v2) -->
+  <div class="modal-overlay hidden" id="grpcProtoModal">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <div class="modal-title-with-icon">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <h3>Import .proto Definition</h3>
+        </div>
+        <button class="btn-close" id="btnCloseGrpcProtoModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+          Paste your <code>.proto</code> file content (syntax proto3) to extract services, methods, and sample JSON requests:
+        </div>
+        <textarea id="grpcProtoInput" class="form-input" rows="12" style="width: 100%; font-family: var(--font-mono); font-size: 12px; line-height: 1.4; resize: vertical;" placeholder="syntax = &quot;proto3&quot;;&#10;package user.v1;&#10;&#10;message GetUserRequest {&#10;  string user_id = 1;&#10;}&#10;&#10;message GetUserResponse {&#10;  string name = 1;&#10;  string email = 2;&#10;}&#10;&#10;service UserService {&#10;  rpc GetUser (GetUserRequest) returns (GetUserResponse);&#10;}"></textarea>
+        <div class="modal-actions" style="margin-top: 14px; justify-content: flex-end; display: flex; gap: 8px;">
+          <button type="button" id="btnCancelGrpcProto" class="btn btn-secondary">Cancel</button>
+          <button type="button" id="btnParseProtoSubmit" class="btn btn-primary">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Parse & Load Services</span>
+          </button>
         </div>
       </div>
     </div>
