@@ -8,6 +8,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"eskhan/internal/variable"
 )
 
 const (
@@ -17,6 +19,7 @@ const (
 
 // DialTarget creates a gRPC client connection based on TargetConfig.
 func DialTarget(ctx context.Context, cfg TargetConfig) (*grpc.ClientConn, error) {
+	cfg.Target = variable.Eval(cfg.Target, cfg.Variables)
 	if cfg.Target == "" {
 		return nil, fmt.Errorf("gRPC target cannot be empty")
 	}

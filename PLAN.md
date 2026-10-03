@@ -48,35 +48,38 @@ Dự án xây dựng công cụ giao diện trực quan tất-cả-trong-một c
 
 ---
 
-### 📌 Giai đoạn 2: REST HTTP Client Engine & Proxy Backend
+### 📌 Giai đoạn 2: REST HTTP Client Engine & Proxy Backend (ĐÃ HOÀN THÀNH ✅)
 *Mục tiêu: Động cơ gửi HTTP request đa năng, giải quyết 100% lỗi CORS của trình duyệt.*
-- [ ] Package [`internal/httpclient`](internal/httpclient): Đầy đủ methods (`GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`).
-- [ ] Headers, Query Params, Request Body (JSON, Form-data, x-www-form-urlencoded, Raw).
-- [ ] Đo đạc chi tiết chỉ số mạng qua `net/http/httptrace` (DNS, TCP, TLS, TTFB, Total Duration).
-- [ ] API endpoint: `POST /api/http/send`.
-- [ ] Unit test cho HTTP engine.
+- [x] Package [`internal/httpclient`](internal/httpclient): Đầy đủ methods (`GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`).
+- [x] Headers, Query Params, Request Body (JSON, Form-data, x-www-form-urlencoded, Raw).
+- [x] Đo đạc chi tiết chỉ số mạng qua `net/http/httptrace` (DNS, TCP, TLS, TTFB, Total Duration).
+- [x] API endpoint: `POST /api/http/send`.
+- [x] Unit test cho HTTP engine (`internal/httpclient/client_test.go`).
 
 ---
 
-### 📌 Giai đoạn 3: OpenAPI & Swagger Parser & Explorer
+### 📌 Giai đoạn 3: OpenAPI & Swagger Parser & Explorer (ĐÃ HOÀN THÀNH ✅)
 *Mục tiêu: 1-click test API từ tài liệu Swagger.*
-- [ ] Package [`internal/openapi`](internal/openapi): Fetch URL Swagger hoặc parse file JSON/YAML (hỗ trợ Swagger 2.0, OpenAPI 3.0/3.1).
-- [ ] Tự động trích xuất endpoints, tags, parameters, và tự động tạo Mock JSON Body từ Schema.
-- [ ] UI Swagger Explorer: Cây danh mục API, tìm kiếm, nút "⚡ Open in Tab" để đẩy sang API Client.
-- [ ] Unit test cho Swagger/OpenAPI parser.
+- [x] Package [`internal/openapi`](internal/openapi): Fetch URL Swagger hoặc parse file JSON/YAML (hỗ trợ Swagger 2.0, OpenAPI 3.0/3.1).
+- [x] Tự động trích xuất endpoints, tags, parameters, và tự động tạo Mock JSON Body từ Schema ($ref resolver).
+- [x] UI Swagger Explorer: Cây danh mục API, tìm kiếm, nút "⚡ Open in Tab" để đẩy sang API Client.
+- [x] Unit test cho Swagger/OpenAPI parser (`internal/openapi/parser_test.go`).
 
 ---
 
-### 📌 Giai đoạn 4: Giao diện IDE Hợp nhất (Multi-Protocol Studio)
+### 📌 Giai đoạn 4: Giao diện IDE Hợp nhất (Multi-Protocol Studio) (ĐÃ HOÀN THÀNH ✅)
 *Mục tiêu: Trải nghiệm mượt mà, chuyển đổi tức thì giữa các phân hệ.*
-- [ ] Sidebar Mode Switcher: 🔍 **Elasticsearch** | 🔌 **gRPC Studio** | 🌐 **REST/Swagger**.
-- [ ] Multi-tab engine: Mở đồng thời các Tab ES Query, Tab gRPC Call, Tab REST Request.
-- [ ] Tối ưu hóa UI Dark Mode, phím tắt thống nhất (`Cmd+Enter` / `Ctrl+Enter` để thực thi).
+- [x] Mode Switcher trên Header: ⚡ **Elasticsearch** | 🔌 **gRPC Studio** | 🌐 **REST & Swagger**.
+- [x] Giao diện REST Client chuẩn Postman: URL Bar, Method dropdown, Params/Headers Key-Value Editor, Body selector.
+- [x] Response Viewer đa chiều: Monaco JSON viewer, Headers table, Timings Breakdown progress bars (DNS, TCP, TLS, TTFB, Total).
+- [x] Tối ưu hóa UI Dark Mode & Light Mode, phím tắt thống nhất (`Cmd+Enter` / `Ctrl+Enter` để thực thi, `Cmd+Shift+F` để beautify JSON).
 
 ---
 
-### 📌 Giai đoạn 5: Collections, Biến môi trường & Đóng gói Phân phối
+### 📌 Giai đoạn 5: Collections, Biến môi trường & Đóng gói Phân phối (ĐÃ HOÀN THÀNH ✅)
 *Mục tiêu: Hoàn thiện tính năng tiện ích hàng ngày và phát hành.*
-- [ ] Lưu trữ Collections & History chung cho cả ES, gRPC và REST.
-- [ ] Environment Manager (`{{base_url}}`, `{{grpc_host}}`, `{{token}}`, `{{$timestamp}}`, `{{$uuid}}`).
-- [ ] Chạy toàn bộ test suite (`go test ./...`) và build cross-platform binaries.
+- [x] Package [`internal/variable`](internal/variable): Hỗ trợ biến người dùng `{{var}}` và biến hệ thống (`{{$timestamp}}`, `{{$timestamp_ms}}`, `{{$uuid}}`, `{{$date}}`, `{{$datetime}}`, `{{$randomInt}}`).
+- [x] Environment Manager (`internal/config` & `internal/api/env_handlers.go`): CRUD environments, kích hoạt môi trường làm việc trực tiếp từ Header dropdown, Monaco autocomplete gợi ý `{{...}}`.
+- [x] Lưu trữ Collections & History chung cho ES, gRPC và REST (`internal/storage`): Lưu request vào folder collections, xem và replay lịch sử gọi API.
+- [x] Chạy toàn bộ test suite (`go test ./...` pass 100%) và đóng gói phân phối cross-platform qua `build_all.sh` (macOS arm64/amd64, Linux amd64, Windows amd64).
+

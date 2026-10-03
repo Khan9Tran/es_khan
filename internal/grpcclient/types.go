@@ -7,6 +7,7 @@ type TargetConfig struct {
 	InsecureSkipVerify bool              `json:"insecure_skip_verify"`
 	Authority          string            `json:"authority,omitempty"`
 	Metadata           map[string]string `json:"metadata,omitempty"`
+	Variables          map[string]string `json:"variables,omitempty"`
 }
 
 // ServiceInfo represents a gRPC service and its methods discovered via reflection or proto files.
@@ -36,6 +37,7 @@ type InvokeRequest struct {
 	Metadata           map[string]string `json:"metadata,omitempty"`
 	Body               string            `json:"body"` // JSON request body from editor
 	TimeoutMs          int               `json:"timeout_ms,omitempty"`
+	Variables          map[string]string `json:"variables,omitempty"`
 }
 
 // InvokeResponse represents the result of a dynamic RPC call.

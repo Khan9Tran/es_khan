@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"eskhan/internal/config"
+	"eskhan/internal/variable"
 )
 
 // Client handles all HTTP interactions with an Elasticsearch cluster.
@@ -489,24 +490,9 @@ func (c *Client) ExecuteQuery(ctx context.Context, req QueryRequest) (*QueryResu
 	return result, nil
 }
 
-// SubstituteVariables replaces template variables like {{var}}, {{$timestamp}}, {{$uuid}}, {{$date}}.
+// SubstituteVariables replaces template variables like {{var}}, {{$timestamp}}, {{$uuid}}, {{$date}}, {{$randomInt}}.
 func SubstituteVariables(input string, userVars map[string]string) string {
-	res := input
-	now := time.Now()
-
-	// Built-in system variables
-	res = strings.ReplaceAll(res, "{{$timestamp}}", strconv.FormatInt(now.Unix(), 10))
-	res = strings.ReplaceAll(res, "{{$timestamp_ms}}", strconv.FormatInt(now.UnixMilli(), 10))
-	res = strings.ReplaceAll(res, "{{$date}}", now.Format("2006-01-02"))
-	res = strings.ReplaceAll(res, "{{$datetime}}", now.Format(time.RFC3339))
-	res = strings.ReplaceAll(res, "{{$uuid}}", fmt.Sprintf("%x-%x", now.UnixNano(), time.Now().Nanosecond()))
-
-	// User defined variables
-	for k, v := range userVars {
-		res = strings.ReplaceAll(res, "{{"+k+"}}", v)
-	}
-
-	return res
+	return variable.Eval(input, userVars)
 }
 
 // AnalyzeText runs text through the _analyze API to test tokenizers and filters.

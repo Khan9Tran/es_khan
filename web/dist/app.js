@@ -35,7 +35,11 @@
     currentInspectDoc: null,
     theme: localStorage.getItem('eskhan_theme') || 'dark',
     currentLang: localStorage.getItem('eskhan_lang') || 'vi',
-    jsonScope: 'hits' // 'hits' (focus on documents) or 'full' (complete response)
+    jsonScope: 'hits', // 'hits' (focus on documents) or 'full' (complete response)
+    environments: [],
+    activeEnvironmentId: '',
+    currentEnvironment: null,
+    activeEnvEditing: null
   };
 
   // DOM Elements
@@ -175,6 +179,8 @@
     btnModeES: document.getElementById('btnModeES'),
     btnModeGRPC: document.getElementById('btnModeGRPC'),
     clusterSelectorContainer: document.getElementById('clusterSelectorContainer'),
+    envSelectorContainer: document.getElementById('envSelectorContainer'),
+    headerActionsDivider: document.getElementById('headerActionsDivider'),
     esWorkspace: document.getElementById('esWorkspace'),
     grpcWorkspace: document.getElementById('grpcWorkspace'),
     grpcTargetInput: document.getElementById('grpcTargetInput'),
@@ -206,7 +212,107 @@
     btnCloseGrpcProtoModal: document.getElementById('btnCloseGrpcProtoModal'),
     btnCancelGrpcProto: document.getElementById('btnCancelGrpcProto'),
     grpcProtoInput: document.getElementById('grpcProtoInput'),
-    btnParseProtoSubmit: document.getElementById('btnParseProtoSubmit')
+    btnParseProtoSubmit: document.getElementById('btnParseProtoSubmit'),
+
+    // v2: REST API Client & Swagger Studio
+    btnModeREST: document.getElementById('btnModeREST'),
+    restWorkspace: document.getElementById('restWorkspace'),
+    restSidebar: document.getElementById('restSidebar'),
+    btnToggleRestSidebar: document.getElementById('btnToggleRestSidebar'),
+    btnCollapseSwaggerSidebar: document.getElementById('btnCollapseSwaggerSidebar'),
+    btnOpenSwaggerModal: document.getElementById('btnOpenSwaggerModal'),
+    swaggerUrlInput: document.getElementById('swaggerUrlInput'),
+    btnLoadSwagger: document.getElementById('btnLoadSwagger'),
+    swaggerSearchInput: document.getElementById('swaggerSearchInput'),
+    swaggerInfoBanner: document.getElementById('swaggerInfoBanner'),
+    swaggerInfoTitle: document.getElementById('swaggerInfoTitle'),
+    swaggerInfoVersion: document.getElementById('swaggerInfoVersion'),
+    swaggerInfoBaseUrl: document.getElementById('swaggerInfoBaseUrl'),
+    swaggerTreeContainer: document.getElementById('swaggerTreeContainer'),
+    restSidebarResizer: document.getElementById('restSidebarResizer'),
+    restMethodSelect: document.getElementById('restMethodSelect'),
+    restUrlInput: document.getElementById('restUrlInput'),
+    btnRestSend: document.getElementById('btnRestSend'),
+    restParamCount: document.getElementById('restParamCount'),
+    restHeaderCount: document.getElementById('restHeaderCount'),
+    restBodyTypeLabel: document.getElementById('restBodyTypeLabel'),
+    restBodyActions: document.getElementById('restBodyActions'),
+    btnRestFormatBody: document.getElementById('btnRestFormatBody'),
+    restParamsRows: document.getElementById('restParamsRows'),
+    btnAddParamRow: document.getElementById('btnAddParamRow'),
+    restHeadersRows: document.getElementById('restHeadersRows'),
+    btnAddHeaderRow: document.getElementById('btnAddHeaderRow'),
+    btnAddAuthHeader: document.getElementById('btnAddAuthHeader'),
+    restBodyContainer: document.getElementById('restBodyContainer'),
+    restBodyEmptyState: document.getElementById('restBodyEmptyState'),
+    restBodyMonacoWrapper: document.getElementById('restBodyMonacoWrapper'),
+    restBodyMonacoContainer: document.getElementById('restBodyMonacoContainer'),
+    restBodyFormWrapper: document.getElementById('restBodyFormWrapper'),
+    restFormRows: document.getElementById('restFormRows'),
+    btnAddFormRow: document.getElementById('btnAddFormRow'),
+    restBodyRawWrapper: document.getElementById('restBodyRawWrapper'),
+    restBodyRawInput: document.getElementById('restBodyRawInput'),
+    restTimeoutInput: document.getElementById('restTimeoutInput'),
+    restInsecureCheck: document.getElementById('restInsecureCheck'),
+    restFollowRedirectsCheck: document.getElementById('restFollowRedirectsCheck'),
+    restSplitResizer: document.getElementById('restSplitResizer'),
+    restStatusBadge: document.getElementById('restStatusBadge'),
+    restStatusDot: document.getElementById('restStatusDot'),
+    restStatusText: document.getElementById('restStatusText'),
+    restTimeVal: document.getElementById('restTimeVal'),
+    restSizeVal: document.getElementById('restSizeVal'),
+    btnCopyRestResp: document.getElementById('btnCopyRestResp'),
+    restRespHeadersCount: document.getElementById('restRespHeadersCount'),
+    restRespMonacoContainer: document.getElementById('restRespMonacoContainer'),
+    restRespHeadersList: document.getElementById('restRespHeadersList'),
+    restTimingsContainer: document.getElementById('restTimingsContainer'),
+    swaggerModal: document.getElementById('swaggerModal'),
+    btnCloseSwaggerModal: document.getElementById('btnCloseSwaggerModal'),
+    btnCancelSwaggerModal: document.getElementById('btnCancelSwaggerModal'),
+    swaggerRawInput: document.getElementById('swaggerRawInput'),
+    btnParseSwaggerSubmit: document.getElementById('btnParseSwaggerSubmit'),
+
+    // Environment Selector & Modal
+    envSelect: document.getElementById('envSelect'),
+    btnManageEnvs: document.getElementById('btnManageEnvs'),
+    envModal: document.getElementById('envModal'),
+    btnCloseEnvModal: document.getElementById('btnCloseEnvModal'),
+    btnCancelEnvModal: document.getElementById('btnCancelEnvModal'),
+    btnAddNewEnv: document.getElementById('btnAddNewEnv'),
+    envItemsList: document.getElementById('envItemsList'),
+    envModalNameInput: document.getElementById('envModalNameInput'),
+    btnAddEnvVarRow: document.getElementById('btnAddEnvVarRow'),
+    envVarsTableBody: document.getElementById('envVarsTableBody'),
+    btnDeleteCurrentEnv: document.getElementById('btnDeleteCurrentEnv'),
+    btnSaveEnvSubmit: document.getElementById('btnSaveEnvSubmit'),
+
+    // Save Request Modal
+    saveRequestModal: document.getElementById('saveRequestModal'),
+    saveRequestModalTitle: document.getElementById('saveRequestModalTitle'),
+    btnCloseSaveRequestModal: document.getElementById('btnCloseSaveRequestModal'),
+    btnCancelSaveRequest: document.getElementById('btnCancelSaveRequest'),
+    saveRequestForm: document.getElementById('saveRequestForm'),
+    saveReqProtocol: document.getElementById('saveReqProtocol'),
+    saveReqTitle: document.getElementById('saveReqTitle'),
+    saveReqCollection: document.getElementById('saveReqCollection'),
+    saveReqDesc: document.getElementById('saveReqDesc'),
+
+    // Save buttons
+    btnGrpcSave: document.getElementById('btnGrpcSave'),
+    btnRestSave: document.getElementById('btnRestSave'),
+
+    // REST Sidebar Tabs & Panels
+    tabBtnSwagger: document.getElementById('tabBtnSwagger'),
+    tabBtnCollections: document.getElementById('tabBtnCollections'),
+    tabBtnHistory: document.getElementById('tabBtnHistory'),
+    panelSwagger: document.getElementById('panelSwagger'),
+    panelCollections: document.getElementById('panelCollections'),
+    panelHistory: document.getElementById('panelHistory'),
+    restCollectionsSearch: document.getElementById('restCollectionsSearch'),
+    restCollectionsContainer: document.getElementById('restCollectionsContainer'),
+    restHistorySearch: document.getElementById('restHistorySearch'),
+    restHistoryContainer: document.getElementById('restHistoryContainer'),
+    btnClearRestHistory: document.getElementById('btnClearRestHistory')
   };
 
   // --- Bilingual Localization (VI / EN) ---
@@ -427,6 +533,7 @@
     initMonaco();
 
     await loadClusters();
+    await loadEnvironments();
     await loadDSLSnippets();
     await loadSnippets();
     await loadHistory();
@@ -611,6 +718,39 @@
         };
 
         const suggestions = [];
+
+        // 0. Environment & Dynamic Variables Suggestion (e.g. {{base_url}}, {{$timestamp}}, {{$uuid}})
+        if (lineContentBefore.includes('{{') || lineContentBefore.endsWith('{')) {
+          const sysVars = [
+            { label: '{{$timestamp}}', detail: 'Current Unix timestamp (seconds)', insertText: '{{$timestamp}}' },
+            { label: '{{$timestamp_ms}}', detail: 'Current Unix timestamp (milliseconds)', insertText: '{{$timestamp_ms}}' },
+            { label: '{{$uuid}}', detail: 'Random UUID v4 string', insertText: '{{$uuid}}' },
+            { label: '{{$date}}', detail: 'Current date (YYYY-MM-DD)', insertText: '{{$date}}' },
+            { label: '{{$datetime}}', detail: 'Current ISO8601 datetime', insertText: '{{$datetime}}' },
+            { label: '{{$randomInt}}', detail: 'Random 6-digit integer (100000-999999)', insertText: '{{$randomInt}}' }
+          ];
+          sysVars.forEach(sv => {
+            suggestions.push({
+              label: sv.label,
+              kind: monaco.languages.CompletionItemKind.Variable,
+              insertText: sv.insertText,
+              detail: sv.detail,
+              sortText: '0_' + sv.label
+            });
+          });
+
+          if (state.currentEnvironment && state.currentEnvironment.variables) {
+            Object.entries(state.currentEnvironment.variables).forEach(([k, v]) => {
+              suggestions.push({
+                label: `{{${k}}}`,
+                kind: monaco.languages.CompletionItemKind.Variable,
+                insertText: `{{${k}}}`,
+                detail: `Env Var (${state.currentEnvironment.name}): ${v}`,
+                sortText: '1_' + k
+              });
+            });
+          }
+        }
 
         // 1. Line 1: HTTP Method & Index Endpoint Suggestions
         if (position.lineNumber === 1 && !lineContent.trim().startsWith('{')) {
@@ -2264,6 +2404,7 @@ func QueryMatchAll() ESQuery {
 
   function setupEventListeners() {
     setupGRPCEventListeners();
+    setupRESTEventListeners();
 
     // Cluster Selector Switch
     el.clusterSelect.addEventListener('change', async (e) => {
@@ -2939,6 +3080,56 @@ func QueryMatchAll() ESQuery {
     }
   }
 
+  // --- Toast Notifications System ---
+  function showToast(message, type = 'info') {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toastContainer';
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    const toastType = (type === 'danger' || type === 'error') ? 'error' : (type === 'warning' ? 'warning' : (type === 'success' ? 'success' : 'info'));
+    toast.className = `toast-item toast-${toastType}`;
+
+    let iconSvg = '';
+    if (toastType === 'success') {
+      iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    } else if (toastType === 'error') {
+      iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+    } else if (toastType === 'warning') {
+      iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+    } else {
+      iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+    }
+
+    toast.innerHTML = `
+      ${iconSvg}
+      <div class="toast-message">${escapeHtml(message)}</div>
+      <button type="button" class="toast-close" title="Close">&times;</button>
+    `;
+
+    const closeBtn = toast.querySelector('.toast-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        toast.classList.add('toast-fade-out');
+        setTimeout(() => toast.remove(), 250);
+      });
+    }
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.classList.add('toast-fade-out');
+        setTimeout(() => toast.remove(), 250);
+      }
+    }, 3500);
+  }
+  window.showToast = showToast;
+
   // ==========================================================================
   // v2: gRPC Studio Controller & Dynamic Invoker Logic
   // ==========================================================================
@@ -2958,25 +3149,40 @@ func QueryMatchAll() ESQuery {
     if (mode === 'es') {
       if (el.btnModeES) el.btnModeES.classList.add('active');
       if (el.btnModeGRPC) el.btnModeGRPC.classList.remove('active');
+      if (el.btnModeREST) el.btnModeREST.classList.remove('active');
       if (el.esWorkspace) el.esWorkspace.classList.remove('hidden');
       if (el.grpcWorkspace) el.grpcWorkspace.classList.add('hidden');
+      if (el.restWorkspace) el.restWorkspace.classList.add('hidden');
       if (el.clusterSelectorContainer) el.clusterSelectorContainer.classList.remove('hidden');
+      if (el.envSelectorContainer) el.envSelectorContainer.classList.add('hidden');
+      if (el.headerActionsDivider) el.headerActionsDivider.classList.remove('hidden');
       if (el.btnSafeMode) el.btnSafeMode.classList.remove('hidden');
       if (el.btnAntigravity) el.btnAntigravity.classList.remove('hidden');
+      if (el.btnGolangModal) el.btnGolangModal.classList.remove('hidden');
       if (el.btnFormat) el.btnFormat.classList.remove('hidden');
       if (el.btnSaveSnippetModal) el.btnSaveSnippetModal.classList.remove('hidden');
       if (el.btnRunQuery) el.btnRunQuery.classList.remove('hidden');
+      if (el.linterBadge && state.linterWarnings && state.linterWarnings.length > 0) {
+        el.linterBadge.classList.remove('hidden');
+      }
       if (state.editorInstance) {
         setTimeout(() => state.editorInstance.layout(), 60);
       }
     } else if (mode === 'grpc') {
       if (el.btnModeGRPC) el.btnModeGRPC.classList.add('active');
       if (el.btnModeES) el.btnModeES.classList.remove('active');
+      if (el.btnModeREST) el.btnModeREST.classList.remove('active');
       if (el.grpcWorkspace) el.grpcWorkspace.classList.remove('hidden');
       if (el.esWorkspace) el.esWorkspace.classList.add('hidden');
+      if (el.restWorkspace) el.restWorkspace.classList.add('hidden');
       if (el.clusterSelectorContainer) el.clusterSelectorContainer.classList.add('hidden');
+      if (el.envSelectorContainer) el.envSelectorContainer.classList.remove('hidden');
+      if (el.headerActionsDivider) el.headerActionsDivider.classList.add('hidden');
       if (el.btnSafeMode) el.btnSafeMode.classList.add('hidden');
+      if (el.linterBadge) el.linterBadge.classList.add('hidden');
       if (el.btnAntigravity) el.btnAntigravity.classList.add('hidden');
+      if (el.aiPromptBar) el.aiPromptBar.classList.add('hidden');
+      if (el.btnGolangModal) el.btnGolangModal.classList.add('hidden');
       if (el.btnFormat) el.btnFormat.classList.add('hidden');
       if (el.btnSaveSnippetModal) el.btnSaveSnippetModal.classList.add('hidden');
       if (el.btnRunQuery) el.btnRunQuery.classList.add('hidden');
@@ -2985,6 +3191,30 @@ func QueryMatchAll() ESQuery {
       setTimeout(() => {
         if (grpcState.editor) grpcState.editor.layout();
         if (grpcState.respEditor) grpcState.respEditor.layout();
+      }, 60);
+    } else if (mode === 'rest') {
+      if (el.btnModeREST) el.btnModeREST.classList.add('active');
+      if (el.btnModeES) el.btnModeES.classList.remove('active');
+      if (el.btnModeGRPC) el.btnModeGRPC.classList.remove('active');
+      if (el.restWorkspace) el.restWorkspace.classList.remove('hidden');
+      if (el.esWorkspace) el.esWorkspace.classList.add('hidden');
+      if (el.grpcWorkspace) el.grpcWorkspace.classList.add('hidden');
+      if (el.clusterSelectorContainer) el.clusterSelectorContainer.classList.add('hidden');
+      if (el.envSelectorContainer) el.envSelectorContainer.classList.remove('hidden');
+      if (el.headerActionsDivider) el.headerActionsDivider.classList.add('hidden');
+      if (el.btnSafeMode) el.btnSafeMode.classList.add('hidden');
+      if (el.linterBadge) el.linterBadge.classList.add('hidden');
+      if (el.btnAntigravity) el.btnAntigravity.classList.add('hidden');
+      if (el.aiPromptBar) el.aiPromptBar.classList.add('hidden');
+      if (el.btnGolangModal) el.btnGolangModal.classList.add('hidden');
+      if (el.btnFormat) el.btnFormat.classList.add('hidden');
+      if (el.btnSaveSnippetModal) el.btnSaveSnippetModal.classList.add('hidden');
+      if (el.btnRunQuery) el.btnRunQuery.classList.add('hidden');
+
+      initRESTMonaco();
+      setTimeout(() => {
+        if (restState.bodyEditor) restState.bodyEditor.layout();
+        if (restState.respEditor) restState.respEditor.layout();
       }, 60);
     }
   }
@@ -3169,7 +3399,7 @@ func QueryMatchAll() ESQuery {
       bodyStr = grpcState.editor.getValue();
     }
 
-    // Collect metadata
+  function getGRPCMetadata() {
     const metadata = {};
     if (el.grpcMetaRows) {
       const rows = el.grpcMetaRows.querySelectorAll('tr');
@@ -3181,6 +3411,11 @@ func QueryMatchAll() ESQuery {
         }
       });
     }
+    return metadata;
+  }
+
+    // Collect metadata
+    const metadata = getGRPCMetadata();
 
     const timeoutMs = parseInt(el.grpcTimeoutInput ? el.grpcTimeoutInput.value : 10000) || 10000;
 
@@ -3512,6 +3747,1378 @@ func QueryMatchAll() ESQuery {
         }
       }
     });
+  }
+
+  // ==========================================================================
+  // v2: REST API Client & Swagger Studio Controller
+  // ==========================================================================
+
+  const restState = {
+    currentSpec: null,
+    bodyType: 'none',
+    bodyEditor: null,
+    respEditor: null,
+    isEditorInitialized: false
+  };
+
+  function initRESTMonaco() {
+    if (restState.isEditorInitialized || !state.isMonacoLoaded || !window.monaco) return;
+
+    const themeName = state.theme === 'light' ? 'vs' : 'vs-dark';
+
+    // Body Monaco Editor
+    if (el.restBodyMonacoContainer) {
+      restState.bodyEditor = monaco.editor.create(el.restBodyMonacoContainer, {
+        value: '{\n  \n}',
+        language: 'json',
+        theme: themeName,
+        automaticLayout: true,
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        fontSize: 13,
+        tabSize: 2,
+        renderLineHighlight: 'all',
+        formatOnPaste: true,
+        formatOnType: true
+      });
+
+      restState.bodyEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function () {
+        sendHTTPRequest();
+      });
+
+      restState.bodyEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyF, function () {
+        formatRESTBody();
+      });
+    }
+
+    // Response Monaco Editor (Read-Only)
+    if (el.restRespMonacoContainer) {
+      restState.respEditor = monaco.editor.create(el.restRespMonacoContainer, {
+        value: '// Send a request to see response here',
+        language: 'json',
+        theme: themeName,
+        automaticLayout: true,
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        fontSize: 13,
+        tabSize: 2,
+        readOnly: true
+      });
+    }
+
+    restState.isEditorInitialized = true;
+  }
+
+  function formatRESTBody() {
+    if (!restState.bodyEditor) return;
+    try {
+      const val = restState.bodyEditor.getValue();
+      if (!val.trim()) return;
+      const parsed = JSON.parse(val);
+      restState.bodyEditor.setValue(JSON.stringify(parsed, null, 2));
+    } catch (e) {
+      showToast('Lỗi format JSON: ' + e.message, 'warning');
+    }
+  }
+
+  function setRESTBodyType(type) {
+    restState.bodyType = type;
+    if (el.restBodyTypeLabel) el.restBodyTypeLabel.textContent = type;
+
+    // Check radio
+    const radio = document.querySelector(`input[name="restBodyType"][value="${type}"]`);
+    if (radio) radio.checked = true;
+
+    // Toggle panels
+    if (el.restBodyEmptyState) el.restBodyEmptyState.classList.toggle('hidden', type !== 'none');
+    if (el.restBodyMonacoWrapper) el.restBodyMonacoWrapper.classList.toggle('hidden', type !== 'json');
+    if (el.restBodyFormWrapper) el.restBodyFormWrapper.classList.toggle('hidden', type !== 'x_www_form_urlencoded' && type !== 'form_data');
+    if (el.restBodyRawWrapper) el.restBodyRawWrapper.classList.toggle('hidden', type !== 'raw');
+    if (el.restBodyActions) el.restBodyActions.style.display = type === 'json' ? 'block' : 'none';
+
+    if (type === 'json' && restState.bodyEditor) {
+      setTimeout(() => restState.bodyEditor.layout(), 30);
+    }
+  }
+
+  function addRESTParamRow(key = '', val = '', checked = true) {
+    if (!el.restParamsRows) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="text-align:center;"><input type="checkbox" class="param-enable-check" ${checked ? 'checked' : ''}></td>
+      <td><input type="text" class="param-key-input" placeholder="Key (e.g. limit)" value="${escapeHtml(key)}"></td>
+      <td><input type="text" class="param-val-input" placeholder="Value (e.g. 20)" value="${escapeHtml(val)}"></td>
+      <td style="text-align:center;"><button type="button" class="btn btn-xs btn-danger btn-del-row" title="Remove Param">&times;</button></td>
+    `;
+    tr.querySelector('.btn-del-row').addEventListener('click', () => {
+      tr.remove();
+      updateRESTParamCount();
+    });
+    tr.querySelectorAll('input').forEach(inp => inp.addEventListener('input', updateRESTParamCount));
+    el.restParamsRows.appendChild(tr);
+    updateRESTParamCount();
+  }
+
+  function updateRESTParamCount() {
+    if (!el.restParamsRows || !el.restParamCount) return;
+    let count = 0;
+    el.restParamsRows.querySelectorAll('tr').forEach(tr => {
+      const chk = tr.querySelector('.param-enable-check');
+      const k = tr.querySelector('.param-key-input');
+      if (chk && chk.checked && k && k.value.trim()) count++;
+    });
+    el.restParamCount.textContent = count;
+  }
+
+  function addRESTHeaderRow(key = '', val = '', checked = true) {
+    if (!el.restHeadersRows) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="text-align:center;"><input type="checkbox" class="header-enable-check" ${checked ? 'checked' : ''}></td>
+      <td><input type="text" class="header-key-input" placeholder="Key (e.g. Authorization)" value="${escapeHtml(key)}"></td>
+      <td><input type="text" class="header-val-input" placeholder="Value" value="${escapeHtml(val)}"></td>
+      <td style="text-align:center;"><button type="button" class="btn btn-xs btn-danger btn-del-row" title="Remove Header">&times;</button></td>
+    `;
+    tr.querySelector('.btn-del-row').addEventListener('click', () => {
+      tr.remove();
+      updateRESTHeaderCount();
+    });
+    tr.querySelectorAll('input').forEach(inp => inp.addEventListener('input', updateRESTHeaderCount));
+    el.restHeadersRows.appendChild(tr);
+    updateRESTHeaderCount();
+  }
+
+  function updateRESTHeaderCount() {
+    if (!el.restHeadersRows || !el.restHeaderCount) return;
+    let count = 0;
+    el.restHeadersRows.querySelectorAll('tr').forEach(tr => {
+      const chk = tr.querySelector('.header-enable-check');
+      const k = tr.querySelector('.header-key-input');
+      if (chk && chk.checked && k && k.value.trim()) count++;
+    });
+    el.restHeaderCount.textContent = count;
+  }
+
+  function addRESTFormRow(key = '', val = '') {
+    if (!el.restFormRows) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" class="form-field-key" placeholder="Field name" value="${escapeHtml(key)}"></td>
+      <td><input type="text" class="form-field-val" placeholder="Value" value="${escapeHtml(val)}"></td>
+      <td style="text-align:center;"><button type="button" class="btn btn-xs btn-danger btn-del-row">&times;</button></td>
+    `;
+    tr.querySelector('.btn-del-row').addEventListener('click', () => tr.remove());
+    el.restFormRows.appendChild(tr);
+  }
+
+  function getRESTRequestData() {
+    let urlStr = el.restUrlInput ? el.restUrlInput.value.trim() : '';
+    const method = el.restMethodSelect ? el.restMethodSelect.value : 'GET';
+
+    // Collect query params
+    const queryParams = {};
+    if (el.restParamsRows) {
+      el.restParamsRows.querySelectorAll('tr').forEach(tr => {
+        const chk = tr.querySelector('.param-enable-check');
+        const k = tr.querySelector('.param-key-input');
+        const v = tr.querySelector('.param-val-input');
+        if (chk && chk.checked && k && k.value.trim()) {
+          queryParams[k.value.trim()] = v ? v.value : '';
+        }
+      });
+    }
+
+    // Collect headers
+    const headers = {};
+    if (el.restHeadersRows) {
+      el.restHeadersRows.querySelectorAll('tr').forEach(tr => {
+        const chk = tr.querySelector('.header-enable-check');
+        const k = tr.querySelector('.header-key-input');
+        const v = tr.querySelector('.header-val-input');
+        if (chk && chk.checked && k && k.value.trim()) {
+          headers[k.value.trim()] = v ? v.value : '';
+        }
+      });
+    }
+
+    // Collect body
+    let bodyStr = '';
+    const formData = {};
+
+    switch (restState.bodyType) {
+      case 'json':
+        if (restState.bodyEditor) bodyStr = restState.bodyEditor.getValue();
+        break;
+      case 'raw':
+        if (el.restBodyRawInput) bodyStr = el.restBodyRawInput.value;
+        break;
+      case 'x_www_form_urlencoded':
+      case 'form_data':
+        if (el.restFormRows) {
+          el.restFormRows.querySelectorAll('tr').forEach(tr => {
+            const k = tr.querySelector('.form-field-key');
+            const v = tr.querySelector('.form-field-val');
+            if (k && k.value.trim()) {
+              formData[k.value.trim()] = v ? v.value : '';
+            }
+          });
+        }
+        break;
+    }
+
+    return {
+      method: method,
+      url: urlStr,
+      query_params: queryParams,
+      headers: headers,
+      body_type: restState.bodyType || 'none',
+      body: bodyStr,
+      form_data: formData
+    };
+  }
+
+  async function sendHTTPRequest() {
+    const reqData = getRESTRequestData();
+    let urlStr = reqData.url;
+    const method = reqData.method;
+
+    if (!urlStr) {
+      showToast('URL cannot be empty', 'warning');
+      return;
+    }
+
+    const queryParams = reqData.query_params;
+    const headers = reqData.headers;
+    let bodyStr = reqData.body;
+    const formData = reqData.form_data;
+
+    const timeoutMs = parseInt(el.restTimeoutInput ? el.restTimeoutInput.value : 30000) || 30000;
+    const insecure = el.restInsecureCheck ? el.restInsecureCheck.checked : true;
+    const followRedirects = el.restFollowRedirectsCheck ? el.restFollowRedirectsCheck.checked : true;
+
+    // UI status to loading
+    if (el.restStatusBadge) el.restStatusBadge.className = 'rest-status-badge';
+    if (el.restStatusDot) el.restStatusDot.className = 'status-dot dot-yellow';
+    if (el.restStatusText) el.restStatusText.textContent = 'Sending...';
+    if (el.restTimeVal) el.restTimeVal.textContent = '...';
+    if (el.restSizeVal) el.restSizeVal.textContent = '...';
+    if (el.btnRestSend) el.btnRestSend.disabled = true;
+
+    try {
+      const res = await fetch('/api/http/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          method: method,
+          url: urlStr,
+          query_params: queryParams,
+          headers: headers,
+          body_type: restState.bodyType,
+          body: bodyStr,
+          form_data: formData,
+          timeout_ms: timeoutMs,
+          insecure_skip_verify: insecure,
+          follow_redirects: followRedirects
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Request failed');
+      }
+
+      // Status Badge
+      const code = data.status_code;
+      if (code >= 200 && code < 300) {
+        if (el.restStatusBadge) el.restStatusBadge.className = 'rest-status-badge status-2xx';
+        if (el.restStatusDot) el.restStatusDot.className = 'status-dot dot-green';
+      } else if (code >= 300 && code < 400) {
+        if (el.restStatusBadge) el.restStatusBadge.className = 'rest-status-badge status-3xx';
+        if (el.restStatusDot) el.restStatusDot.className = 'status-dot dot-blue';
+      } else if (code >= 400 && code < 500) {
+        if (el.restStatusBadge) el.restStatusBadge.className = 'rest-status-badge status-4xx';
+        if (el.restStatusDot) el.restStatusDot.className = 'status-dot dot-yellow';
+      } else {
+        if (el.restStatusBadge) el.restStatusBadge.className = 'rest-status-badge status-5xx';
+        if (el.restStatusDot) el.restStatusDot.className = 'status-dot dot-red';
+      }
+
+      if (el.restStatusText) {
+        el.restStatusText.textContent = code ? `${code} ${data.status_text || ''}` : `Failed: ${data.error || 'Network error'}`;
+      }
+
+      const totalTime = data.timings ? data.timings.total_ms : 0;
+      if (el.restTimeVal) el.restTimeVal.textContent = `${totalTime} ms`;
+      const sizeBytes = data.size || 0;
+      if (el.restSizeVal) {
+        el.restSizeVal.textContent = sizeBytes > 1024 ? `${(sizeBytes / 1024).toFixed(1)} KB` : `${sizeBytes} B`;
+      }
+
+      // Response body
+      if (restState.respEditor) {
+        if (data.body) {
+          try {
+            const parsed = JSON.parse(data.body);
+            restState.respEditor.setValue(JSON.stringify(parsed, null, 2));
+          } catch (e) {
+            restState.respEditor.setValue(data.body);
+          }
+        } else if (data.error) {
+          restState.respEditor.setValue(`// Request failed:\n${data.error}`);
+        } else {
+          restState.respEditor.setValue('// Empty response body (status ' + code + ')');
+        }
+      }
+
+      // Headers
+      renderRESTHeaders(data.headers);
+
+      // Timings
+      renderRESTTimings(data.timings);
+    } catch (err) {
+      if (el.restStatusBadge) el.restStatusBadge.className = 'rest-status-badge status-5xx';
+      if (el.restStatusDot) el.restStatusDot.className = 'status-dot dot-red';
+      if (el.restStatusText) el.restStatusText.textContent = 'Error: ' + err.message;
+      if (restState.respEditor) {
+        restState.respEditor.setValue(`// Error executing request:\n${err.message}`);
+      }
+      showToast('HTTP Request error: ' + err.message, 'danger');
+    } finally {
+      if (el.btnRestSend) el.btnRestSend.disabled = false;
+    }
+  }
+
+  function renderRESTHeaders(headers) {
+    if (!el.restRespHeadersList) return;
+    el.restRespHeadersList.innerHTML = '';
+    const hasHeaders = headers && Object.keys(headers).length > 0;
+    if (!hasHeaders) {
+      el.restRespHeadersList.innerHTML = '<div class="empty-state">No response headers</div>';
+      if (el.restRespHeadersCount) el.restRespHeadersCount.textContent = '0';
+      return;
+    }
+
+    let count = 0;
+    for (const [k, v] of Object.entries(headers)) {
+      count++;
+      const row = document.createElement('div');
+      row.className = 'grpc-header-item';
+      row.innerHTML = `<span class="grpc-header-key">${escapeHtml(k)}:</span> <span class="grpc-header-val">${escapeHtml(Array.isArray(v) ? v.join(', ') : v)}</span>`;
+      el.restRespHeadersList.appendChild(row);
+    }
+    if (el.restRespHeadersCount) el.restRespHeadersCount.textContent = count;
+  }
+
+  function renderRESTTimings(timings) {
+    if (!el.restTimingsContainer) return;
+    if (!timings) {
+      el.restTimingsContainer.innerHTML = '<div class="empty-state">No timings recorded</div>';
+      return;
+    }
+
+    const total = timings.total_ms || 1;
+    const calcPct = (ms) => Math.max(4, Math.min(100, Math.round((ms / total) * 100)));
+
+    el.restTimingsContainer.innerHTML = `
+      <div style="font-weight:600; font-size:13px; margin-bottom:12px; color:var(--text-main);">Network Timings Breakdown</div>
+      <div class="timing-row">
+        <span class="timing-label">DNS Lookup:</span>
+        <span class="timing-val">${timings.dns_lookup_ms} ms</span>
+        <div class="timing-bar-bg"><div class="timing-bar-fill" style="width:${calcPct(timings.dns_lookup_ms)}%; background:#38bdf8;"></div></div>
+      </div>
+      <div class="timing-row">
+        <span class="timing-label">TCP Connect:</span>
+        <span class="timing-val">${timings.tcp_connect_ms} ms</span>
+        <div class="timing-bar-bg"><div class="timing-bar-fill" style="width:${calcPct(timings.tcp_connect_ms)}%; background:#f59e0b;"></div></div>
+      </div>
+      <div class="timing-row">
+        <span class="timing-label">TLS Handshake:</span>
+        <span class="timing-val">${timings.tls_handshake_ms} ms</span>
+        <div class="timing-bar-bg"><div class="timing-bar-fill" style="width:${calcPct(timings.tls_handshake_ms)}%; background:#c084fc;"></div></div>
+      </div>
+      <div class="timing-row">
+        <span class="timing-label">Time to First Byte (TTFB):</span>
+        <span class="timing-val">${timings.ttfb_ms} ms</span>
+        <div class="timing-bar-bg"><div class="timing-bar-fill" style="width:${calcPct(timings.ttfb_ms)}%; background:#10b981;"></div></div>
+      </div>
+      <div class="timing-row" style="border-top:1px solid var(--border); margin-top:8px; padding-top:10px; font-weight:bold;">
+        <span class="timing-label" style="color:var(--text-main);">Total Duration:</span>
+        <span class="timing-val" style="color:var(--accent); font-size:13px;">${timings.total_ms} ms</span>
+        <div class="timing-bar-bg"><div class="timing-bar-fill" style="width:100%; background:var(--accent);"></div></div>
+      </div>
+    `;
+  }
+
+  function copyRESTResponse() {
+    if (!restState.respEditor) return;
+    const text = restState.respEditor.getValue();
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('Đã copy Response vào clipboard!', 'success');
+    }).catch(err => {
+      showToast('Lỗi copy: ' + err.message, 'danger');
+    });
+  }
+
+  // Swagger Functions
+  async function loadSwaggerSpec(targetUrl) {
+    const urlStr = targetUrl || (el.swaggerUrlInput ? el.swaggerUrlInput.value.trim() : '');
+    if (!urlStr) {
+      showToast('Vui lòng nhập URL của Swagger/OpenAPI spec', 'warning');
+      return;
+    }
+
+    const origBtnHtml = el.btnLoadSwagger ? el.btnLoadSwagger.innerHTML : '';
+    if (el.btnLoadSwagger) {
+      el.btnLoadSwagger.disabled = true;
+      el.btnLoadSwagger.innerHTML = `<span class="spinner"></span> <span>Fetching Spec...</span>`;
+    }
+
+    try {
+      const res = await fetch('/api/openapi/parse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: urlStr })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to parse spec');
+      }
+
+      restState.currentSpec = data;
+      renderSwaggerTree(data);
+      showToast(`Đã nạp ${data.endpoints ? data.endpoints.length : 0} API endpoints từ Swagger!`, 'success');
+    } catch (err) {
+      showToast('Swagger error: ' + err.message, 'danger');
+    } finally {
+      if (el.btnLoadSwagger) {
+        el.btnLoadSwagger.disabled = false;
+        el.btnLoadSwagger.innerHTML = origBtnHtml;
+      }
+    }
+  }
+
+  async function parseSwaggerRaw() {
+    const content = el.swaggerRawInput ? el.swaggerRawInput.value.trim() : '';
+    if (!content) {
+      showToast('Vui lòng nhập nội dung JSON hoặc YAML spec', 'warning');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/openapi/parse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: content })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to parse spec');
+      }
+
+      restState.currentSpec = data;
+      renderSwaggerTree(data);
+      if (el.swaggerModal) el.swaggerModal.classList.add('hidden');
+      showToast(`Đã import thành công ${data.endpoints ? data.endpoints.length : 0} API endpoints!`, 'success');
+    } catch (err) {
+      showToast('Swagger parse error: ' + err.message, 'danger');
+    }
+  }
+
+  function renderSwaggerTree(spec, filterQuery = '') {
+    if (!el.swaggerTreeContainer || !spec) return;
+
+    // Show banner
+    if (el.swaggerInfoBanner) el.swaggerInfoBanner.classList.remove('hidden');
+    if (el.swaggerInfoTitle) el.swaggerInfoTitle.textContent = spec.info ? spec.info.title : 'API Documentation';
+    if (el.swaggerInfoVersion) el.swaggerInfoVersion.textContent = spec.info ? (spec.info.version || 'v1') : '';
+    if (el.swaggerInfoBaseUrl) el.swaggerInfoBaseUrl.textContent = spec.info ? (spec.info.base_url || '/') : '/';
+
+    el.swaggerTreeContainer.innerHTML = '';
+    const byTag = spec.by_tag || {};
+    const tags = spec.tags || Object.keys(byTag);
+
+    const query = (filterQuery || '').toLowerCase();
+    let totalRendered = 0;
+
+    tags.forEach(tag => {
+      const endpoints = byTag[tag] || [];
+      const filtered = endpoints.filter(ep => {
+        if (!query) return true;
+        return ep.path.toLowerCase().includes(query) || (ep.summary && ep.summary.toLowerCase().includes(query)) || ep.method.toLowerCase().includes(query);
+      });
+
+      if (filtered.length === 0) return;
+
+      const groupDiv = document.createElement('div');
+      groupDiv.className = 'swagger-tag-group';
+
+      const tagHeader = document.createElement('div');
+      tagHeader.className = 'swagger-tag-header';
+      tagHeader.innerHTML = `<span>${escapeHtml(tag)}</span> <span class="tag-badge" style="font-size:10px;">${filtered.length}</span>`;
+
+      const listDiv = document.createElement('div');
+      listDiv.className = 'swagger-tag-list';
+
+      tagHeader.addEventListener('click', () => {
+        listDiv.classList.toggle('hidden');
+      });
+
+      filtered.forEach(ep => {
+        totalRendered++;
+        const item = document.createElement('div');
+        item.className = 'swagger-endpoint-item';
+        const methodClass = ep.method ? ep.method.toLowerCase() : 'get';
+        item.innerHTML = `
+          <span class="method-badge ${methodClass}">${escapeHtml(ep.method)}</span>
+          <span class="swagger-endpoint-path" title="${escapeHtml(ep.path)}">${escapeHtml(ep.path)}</span>
+          ${ep.summary ? `<span class="swagger-endpoint-summary" title="${escapeHtml(ep.summary)}">${escapeHtml(ep.summary)}</span>` : ''}
+        `;
+
+        item.addEventListener('click', () => {
+          loadSwaggerEndpointToRequest(ep, spec.info ? spec.info.base_url : '');
+        });
+
+        listDiv.appendChild(item);
+      });
+
+      groupDiv.appendChild(tagHeader);
+      groupDiv.appendChild(listDiv);
+      el.swaggerTreeContainer.appendChild(groupDiv);
+    });
+
+    if (totalRendered === 0) {
+      el.swaggerTreeContainer.innerHTML = '<div class="empty-state">No matching endpoints found</div>';
+    }
+  }
+
+  function loadSwaggerEndpointToRequest(endpoint, baseURL) {
+    if (!endpoint) return;
+
+    // Method
+    if (el.restMethodSelect) el.restMethodSelect.value = endpoint.method;
+
+    // URL
+    let fullURL = endpoint.path;
+    if (baseURL) {
+      if (baseURL.endsWith('/') && fullURL.startsWith('/')) {
+        fullURL = baseURL + fullURL.slice(1);
+      } else if (!baseURL.endsWith('/') && !fullURL.startsWith('/')) {
+        fullURL = baseURL + '/' + fullURL;
+      } else {
+        fullURL = baseURL + fullURL;
+      }
+    }
+    if (el.restUrlInput) el.restUrlInput.value = fullURL;
+
+    // Clear and populate query params
+    if (el.restParamsRows) el.restParamsRows.innerHTML = '';
+    const params = endpoint.parameters || [];
+    params.forEach(p => {
+      if (p.in === 'query') {
+        addRESTParamRow(p.name, p.default !== undefined ? String(p.default) : '', p.required);
+      } else if (p.in === 'header') {
+        addRESTHeaderRow(p.name, p.default !== undefined ? String(p.default) : '', p.required);
+      }
+    });
+
+    // Body
+    if (endpoint.mock_body) {
+      setRESTBodyType('json');
+      if (restState.bodyEditor) {
+        restState.bodyEditor.setValue(endpoint.mock_body);
+      }
+    } else if (endpoint.request_body_type === 'x_www_form_urlencoded') {
+      setRESTBodyType('x_www_form_urlencoded');
+    } else if (endpoint.request_body_type === 'form_data') {
+      setRESTBodyType('form_data');
+    } else {
+      setRESTBodyType('none');
+    }
+
+    showToast(`Đã nạp [${endpoint.method}] ${endpoint.path} vào Request Builder`, 'info');
+  }
+
+  function setupRESTResizers() {
+    // 1. Sidebar resizer
+    if (el.restSidebarResizer && el.restSidebar) {
+      let isDragging = false;
+      let startX = 0;
+      let startW = 0;
+      el.restSidebarResizer.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        startW = el.restSidebar.getBoundingClientRect().width;
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const newW = Math.max(220, Math.min(550, startW + dx));
+        el.restSidebar.style.width = `${newW}px`;
+        if (restState.bodyEditor) restState.bodyEditor.layout();
+        if (restState.respEditor) restState.respEditor.layout();
+      });
+      window.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+          if (restState.bodyEditor) restState.bodyEditor.layout();
+          if (restState.respEditor) restState.respEditor.layout();
+        }
+      });
+    }
+
+    // 2. Request/Response split resizer
+    if (el.restSplitResizer) {
+      let isDragging = false;
+      let startX = 0;
+      let startW = 0;
+      const reqPane = document.querySelector('.rest-req-pane');
+      el.restSplitResizer.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        startW = reqPane ? reqPane.getBoundingClientRect().width : 400;
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging || !reqPane) return;
+        const dx = e.clientX - startX;
+        const newW = Math.max(280, Math.min(window.innerWidth - 300, startW + dx));
+        reqPane.style.flex = `0 0 ${newW}px`;
+        if (restState.bodyEditor) restState.bodyEditor.layout();
+        if (restState.respEditor) restState.respEditor.layout();
+      });
+      window.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+          if (restState.bodyEditor) restState.bodyEditor.layout();
+          if (restState.respEditor) restState.respEditor.layout();
+        }
+      });
+    }
+  }
+
+  function setupRESTEventListeners() {
+    if (el.btnModeREST) {
+      el.btnModeREST.addEventListener('click', () => switchStudioMode('rest'));
+    }
+
+    function toggleRESTSidebar() {
+      if (!el.restSidebar) return;
+      const isCollapsed = el.restSidebar.classList.toggle('collapsed');
+      if (el.restSidebarResizer) {
+        el.restSidebarResizer.classList.toggle('collapsed', isCollapsed);
+      }
+      if (el.btnToggleRestSidebar) {
+        el.btnToggleRestSidebar.classList.toggle('active', !isCollapsed);
+        el.btnToggleRestSidebar.title = isCollapsed ? 'Show Sidebar (Swagger / Collections / History)' : 'Hide Sidebar';
+      }
+      setTimeout(() => {
+        if (restState.bodyEditor) restState.bodyEditor.layout();
+        if (restState.respEditor) restState.respEditor.layout();
+      }, 60);
+    }
+
+    if (el.btnToggleRestSidebar) {
+      el.btnToggleRestSidebar.addEventListener('click', toggleRESTSidebar);
+    }
+    document.querySelectorAll('.btn-collapse-rest-sidebar').forEach(btn => {
+      btn.addEventListener('click', toggleRESTSidebar);
+    });
+
+    if (el.btnRestSend) {
+      el.btnRestSend.addEventListener('click', sendHTTPRequest);
+    }
+
+    if (el.btnRestFormatBody) {
+      el.btnRestFormatBody.addEventListener('click', formatRESTBody);
+    }
+
+    if (el.btnCopyRestResp) {
+      el.btnCopyRestResp.addEventListener('click', copyRESTResponse);
+    }
+
+    // Params & Headers rows
+    if (el.btnAddParamRow) {
+      el.btnAddParamRow.addEventListener('click', () => addRESTParamRow());
+    }
+    if (el.btnAddHeaderRow) {
+      el.btnAddHeaderRow.addEventListener('click', () => addRESTHeaderRow());
+    }
+    if (el.btnAddAuthHeader) {
+      el.btnAddAuthHeader.addEventListener('click', () => addRESTHeaderRow('Authorization', 'Bearer <token>'));
+    }
+    if (el.btnAddFormRow) {
+      el.btnAddFormRow.addEventListener('click', () => addRESTFormRow());
+    }
+
+    // Body type selector radio buttons
+    document.querySelectorAll('input[name="restBodyType"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        setRESTBodyType(e.target.value);
+      });
+    });
+
+    // Swagger explorer buttons
+    if (el.btnLoadSwagger) {
+      el.btnLoadSwagger.addEventListener('click', () => loadSwaggerSpec());
+    }
+    if (el.btnOpenSwaggerModal) {
+      el.btnOpenSwaggerModal.addEventListener('click', () => {
+        if (el.swaggerModal) el.swaggerModal.classList.remove('hidden');
+      });
+    }
+    if (el.btnCloseSwaggerModal) {
+      el.btnCloseSwaggerModal.addEventListener('click', () => {
+        if (el.swaggerModal) el.swaggerModal.classList.add('hidden');
+      });
+    }
+    if (el.btnCancelSwaggerModal) {
+      el.btnCancelSwaggerModal.addEventListener('click', () => {
+        if (el.swaggerModal) el.swaggerModal.classList.add('hidden');
+      });
+    }
+    if (el.btnParseSwaggerSubmit) {
+      el.btnParseSwaggerSubmit.addEventListener('click', parseSwaggerRaw);
+    }
+
+    // Search input in Swagger tree
+    if (el.swaggerSearchInput) {
+      el.swaggerSearchInput.addEventListener('input', (e) => {
+        if (restState.currentSpec) {
+          renderSwaggerTree(restState.currentSpec, e.target.value);
+        }
+      });
+    }
+
+    // Tabs inside REST Request pane
+    document.querySelectorAll('.rest-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.rest-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.rest-tab-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        const targetId = tab.getAttribute('data-tab');
+        const panel = document.getElementById(targetId);
+        if (panel) panel.classList.add('active');
+        if (targetId === 'rest-tab-body' && restState.bodyType === 'json' && restState.bodyEditor) {
+          setTimeout(() => restState.bodyEditor.layout(), 30);
+        }
+      });
+    });
+
+    // Tabs inside REST Response pane
+    document.querySelectorAll('.rest-resp-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.rest-resp-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.rest-resp-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        const targetId = tab.getAttribute('data-tab');
+        const panel = document.getElementById(targetId);
+        if (panel) panel.classList.add('active');
+        if (targetId === 'rest-resp-tab-body' && restState.respEditor) {
+          setTimeout(() => restState.respEditor.layout(), 30);
+        }
+      });
+    });
+
+    // Resizers
+    setupRESTResizers();
+
+    // Default headers and params
+    addRESTHeaderRow('Content-Type', 'application/json');
+
+    // Global Keydown hook
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        if (grpcState.currentMode === 'rest') {
+          e.preventDefault();
+          sendHTTPRequest();
+        }
+      }
+      if ((e.metaKey || e.ctrlKey) && (e.key === 's' || e.key === 'S')) {
+        e.preventDefault();
+        if (grpcState.currentMode === 'rest') {
+          openSaveRequestModal('http');
+        } else if (grpcState.currentMode === 'grpc') {
+          openSaveRequestModal('grpc');
+        } else {
+          if (el.saveSnippetModal) el.saveSnippetModal.classList.add('active');
+        }
+      }
+    });
+
+    // Setup v2 features: environments, save to collections, and rest sidebar
+    setupEnvironmentEvents();
+    setupSaveRequestEvents();
+    setupRESTSidebarTabs();
+  }
+
+  // --- Environment Variables Management (v2) ---
+  async function loadEnvironments() {
+    try {
+      const data = await apiGet('/api/environments');
+      state.environments = data.environments || [];
+      state.activeEnvironmentId = data.active_environment_id || '';
+      state.currentEnvironment = state.environments.find(e => e.id === state.activeEnvironmentId) || null;
+
+      if (el.envSelect) {
+        el.envSelect.innerHTML = '<option value="">No Environment</option>';
+        state.environments.forEach(env => {
+          const opt = document.createElement('option');
+          opt.value = env.id;
+          opt.textContent = env.name;
+          if (env.id === state.activeEnvironmentId) opt.selected = true;
+          el.envSelect.appendChild(opt);
+        });
+      }
+    } catch (err) {
+      console.error('Failed to load environments:', err);
+    }
+  }
+
+  async function onEnvSelectChange() {
+    if (!el.envSelect) return;
+    const selectedId = el.envSelect.value;
+    try {
+      await apiPost(`/api/environments/${selectedId || 'none'}/activate`, {});
+      await loadEnvironments();
+      const activeName = state.currentEnvironment ? state.currentEnvironment.name : 'No Environment';
+      showToast(`Environment: ${activeName}`, 'info');
+    } catch (err) {
+      showToast('Failed to switch environment: ' + err.message, 'error');
+    }
+  }
+
+  function openEnvModal() {
+    if (!el.envModal) return;
+    renderEnvModalList();
+    const target = state.currentEnvironment || state.environments[0] || null;
+    selectEnvForEditing(target);
+    el.envModal.classList.remove('hidden');
+    el.envModal.classList.add('active');
+  }
+
+  function closeEnvModal() {
+    if (el.envModal) {
+      el.envModal.classList.add('hidden');
+      el.envModal.classList.remove('active');
+    }
+  }
+
+  function renderEnvModalList() {
+    if (!el.envItemsList) return;
+    el.envItemsList.innerHTML = '';
+    state.environments.forEach(env => {
+      const row = document.createElement('div');
+      row.className = `env-item-row ${state.activeEnvEditing && state.activeEnvEditing.id === env.id ? 'active' : ''}`;
+      row.innerHTML = `
+        <span>${escapeHtml(env.name)}</span>
+        ${env.id === state.activeEnvironmentId ? '<span class="status-dot dot-green" style="width:7px; height:7px;" title="Active"></span>' : ''}
+      `;
+      row.addEventListener('click', () => selectEnvForEditing(env));
+      el.envItemsList.appendChild(row);
+    });
+  }
+
+  function selectEnvForEditing(env) {
+    state.activeEnvEditing = env;
+    renderEnvModalList();
+    if (!env) {
+      if (el.envModalNameInput) el.envModalNameInput.value = '';
+      if (el.envVarsTableBody) el.envVarsTableBody.innerHTML = '';
+      if (el.btnDeleteCurrentEnv) el.btnDeleteCurrentEnv.classList.add('hidden');
+      return;
+    }
+
+    if (el.envModalNameInput) el.envModalNameInput.value = env.name || '';
+    if (el.btnDeleteCurrentEnv) {
+      if (env.id) {
+        el.btnDeleteCurrentEnv.classList.remove('hidden');
+      } else {
+        el.btnDeleteCurrentEnv.classList.add('hidden');
+      }
+    }
+
+    if (el.envVarsTableBody) {
+      el.envVarsTableBody.innerHTML = '';
+      const vars = env.variables || {};
+      const entries = Object.entries(vars);
+      if (entries.length === 0) {
+        addEnvVarRow('', '');
+      } else {
+        entries.forEach(([k, v]) => addEnvVarRow(k, v));
+      }
+    }
+  }
+
+  function addEnvVarRow(key = '', val = '') {
+    if (!el.envVarsTableBody) return;
+    const tr = document.createElement('tr');
+    tr.className = 'kv-row';
+    tr.innerHTML = `
+      <td><input type="text" class="form-input form-input-sm kv-key" placeholder="Variable Name" value="${escapeHtml(key)}"></td>
+      <td><input type="text" class="form-input form-input-sm kv-val" placeholder="Value" value="${escapeHtml(val)}"></td>
+      <td style="text-align: center;"><button type="button" class="btn btn-icon btn-icon-xs btn-del-row" title="Delete Variable">&times;</button></td>
+    `;
+    tr.querySelector('.btn-del-row').addEventListener('click', () => tr.remove());
+    el.envVarsTableBody.appendChild(tr);
+  }
+
+  async function saveEnvironmentSubmit() {
+    const name = el.envModalNameInput ? el.envModalNameInput.value.trim() : '';
+    if (!name) {
+      showToast('Environment name is required', 'error');
+      return;
+    }
+
+    const variables = {};
+    if (el.envVarsTableBody) {
+      el.envVarsTableBody.querySelectorAll('.kv-row').forEach(row => {
+        const k = row.querySelector('.kv-key').value.trim();
+        const v = row.querySelector('.kv-val').value;
+        if (k) variables[k] = v;
+      });
+    }
+
+    const payload = {
+      id: state.activeEnvEditing ? state.activeEnvEditing.id : '',
+      name: name,
+      variables: variables
+    };
+
+    try {
+      const res = await apiPost('/api/environments', payload);
+      await loadEnvironments();
+      state.activeEnvEditing = res.environment || null;
+      renderEnvModalList();
+      showToast('Environment saved successfully', 'success');
+    } catch (err) {
+      showToast('Failed to save environment: ' + err.message, 'error');
+    }
+  }
+
+  async function deleteCurrentEnv() {
+    if (!state.activeEnvEditing || !state.activeEnvEditing.id) return;
+    if (!confirm(`Delete environment "${state.activeEnvEditing.name}"?`)) return;
+
+    try {
+      await apiDelete(`/api/environments/${state.activeEnvEditing.id}`);
+      await loadEnvironments();
+      selectEnvForEditing(state.environments[0] || null);
+      showToast('Environment deleted', 'info');
+    } catch (err) {
+      showToast('Failed to delete environment: ' + err.message, 'error');
+    }
+  }
+
+  function setupEnvironmentEvents() {
+    if (el.envSelect) {
+      el.envSelect.addEventListener('change', onEnvSelectChange);
+    }
+    if (el.btnManageEnvs) {
+      el.btnManageEnvs.addEventListener('click', openEnvModal);
+    }
+    if (el.btnCloseEnvModal) {
+      el.btnCloseEnvModal.addEventListener('click', closeEnvModal);
+    }
+    if (el.btnCancelEnvModal) {
+      el.btnCancelEnvModal.addEventListener('click', closeEnvModal);
+    }
+    if (el.btnAddNewEnv) {
+      el.btnAddNewEnv.addEventListener('click', () => {
+        selectEnvForEditing({ id: '', name: 'New Environment', variables: {} });
+      });
+    }
+    if (el.btnAddEnvVarRow) {
+      el.btnAddEnvVarRow.addEventListener('click', () => addEnvVarRow('', ''));
+    }
+    if (el.btnSaveEnvSubmit) {
+      el.btnSaveEnvSubmit.addEventListener('click', saveEnvironmentSubmit);
+    }
+    if (el.btnDeleteCurrentEnv) {
+      el.btnDeleteCurrentEnv.addEventListener('click', deleteCurrentEnv);
+    }
+  }
+
+  // --- Save Request / RPC to Collections (v2) ---
+  function openSaveRequestModal(protocol) {
+    if (!el.saveRequestModal) {
+      el.saveRequestModal = document.getElementById('saveRequestModal');
+    }
+    if (!el.saveRequestModal) return;
+
+    if (!el.saveReqProtocol) el.saveReqProtocol = document.getElementById('saveReqProtocol');
+    if (!el.saveReqTitle) el.saveReqTitle = document.getElementById('saveReqTitle');
+    if (!el.saveReqCollection) el.saveReqCollection = document.getElementById('saveReqCollection');
+    if (!el.saveRequestModalTitle) el.saveRequestModalTitle = document.getElementById('saveRequestModalTitle');
+
+    if (el.saveReqProtocol) el.saveReqProtocol.value = protocol;
+
+    if (protocol === 'http') {
+      const method = el.restMethodSelect ? el.restMethodSelect.value : 'GET';
+      const url = el.restUrlInput ? el.restUrlInput.value.trim() : '';
+      let defaultTitle = `${method} ${url.split('?')[0].split('/').filter(Boolean).pop() || 'Request'}`;
+      if (el.saveReqTitle) el.saveReqTitle.value = defaultTitle;
+      if (el.saveRequestModalTitle) el.saveRequestModalTitle.textContent = 'Save HTTP Request to Collections';
+    } else if (protocol === 'grpc') {
+      const mName = grpcState.selectedMethod ? grpcState.selectedMethod.name : 'RPC Call';
+      const sName = grpcState.selectedService ? grpcState.selectedService.name.split('.').pop() : 'gRPC';
+      if (el.saveReqTitle) el.saveReqTitle.value = mName;
+      if (el.saveReqCollection) el.saveReqCollection.value = sName;
+      if (el.saveRequestModalTitle) el.saveRequestModalTitle.textContent = 'Save gRPC Method to Collections';
+    }
+
+    el.saveRequestModal.classList.remove('hidden');
+    el.saveRequestModal.classList.add('active');
+
+    setTimeout(() => {
+      if (el.saveReqTitle) {
+        el.saveReqTitle.focus();
+        el.saveReqTitle.select();
+      }
+    }, 60);
+  }
+
+  function closeSaveRequestModal() {
+    if (!el.saveRequestModal) {
+      el.saveRequestModal = document.getElementById('saveRequestModal');
+    }
+    if (el.saveRequestModal) {
+      el.saveRequestModal.classList.remove('active');
+      el.saveRequestModal.classList.add('hidden');
+    }
+  }
+
+  window.openSaveRequestModal = openSaveRequestModal;
+  window.closeSaveRequestModal = closeSaveRequestModal;
+  window.onSaveRequestSubmit = onSaveRequestSubmit;
+
+  async function onSaveRequestSubmit(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const protocol = el.saveReqProtocol ? el.saveReqProtocol.value : 'http';
+    const title = el.saveReqTitle ? el.saveReqTitle.value.trim() : 'Saved Request';
+    const collection = el.saveReqCollection ? el.saveReqCollection.value.trim() : 'Default';
+    const desc = el.saveReqDesc ? el.saveReqDesc.value.trim() : '';
+
+    let payload = {
+      protocol: protocol,
+      title: title || 'Saved Request',
+      collection: collection || 'Default',
+      description: desc
+    };
+
+    if (protocol === 'http') {
+      const reqData = getRESTRequestData();
+      payload.method = reqData.method;
+      payload.path = reqData.url;
+      payload.headers = reqData.headers;
+      payload.query_params = reqData.query_params;
+      payload.body_type = reqData.body_type;
+      payload.content = reqData.body;
+      payload.form_data = reqData.form_data;
+    } else if (protocol === 'grpc') {
+      payload.method = grpcState.selectedMethod ? grpcState.selectedMethod.name : 'Invoke';
+      payload.path = `${el.grpcTargetInput ? el.grpcTargetInput.value.trim() : ''}/${grpcState.selectedService ? grpcState.selectedService.name : ''}/${payload.method}`;
+      payload.headers = getGRPCMetadata();
+      payload.content = grpcState.editor ? grpcState.editor.getValue() : '{}';
+    }
+
+    try {
+      await apiPost('/api/snippets', payload);
+      closeSaveRequestModal();
+      showToast(`Saved "${title}" to collection "${collection}"!`, 'success');
+      if (protocol === 'http') {
+        loadRESTCollections();
+        if (el.tabBtnCollections && el.panelCollections) {
+          if (el.tabBtnSwagger) el.tabBtnSwagger.classList.remove('active');
+          if (el.tabBtnHistory) el.tabBtnHistory.classList.remove('active');
+          el.tabBtnCollections.classList.add('active');
+          if (el.panelSwagger) el.panelSwagger.classList.add('hidden');
+          if (el.panelHistory) el.panelHistory.classList.add('hidden');
+          el.panelCollections.classList.remove('hidden');
+        }
+      }
+    } catch (err) {
+      console.error('Failed to save request:', err);
+      showToast('Failed to save request: ' + err.message, 'error');
+    }
+  }
+
+  function setupSaveRequestEvents() {
+    if (!el.btnRestSave) el.btnRestSave = document.getElementById('btnRestSave');
+    if (!el.btnGrpcSave) el.btnGrpcSave = document.getElementById('btnGrpcSave');
+    if (!el.btnCloseSaveRequestModal) el.btnCloseSaveRequestModal = document.getElementById('btnCloseSaveRequestModal');
+    if (!el.btnCancelSaveRequest) el.btnCancelSaveRequest = document.getElementById('btnCancelSaveRequest');
+    if (!el.btnSaveRequestSubmit) el.btnSaveRequestSubmit = document.getElementById('btnSaveRequestSubmit');
+    if (!el.saveRequestForm) el.saveRequestForm = document.getElementById('saveRequestForm');
+    if (!el.saveRequestModal) el.saveRequestModal = document.getElementById('saveRequestModal');
+
+    if (el.btnRestSave) {
+      el.btnRestSave.addEventListener('click', (e) => {
+        e.preventDefault();
+        openSaveRequestModal('http');
+      });
+    }
+    if (el.btnGrpcSave) {
+      el.btnGrpcSave.addEventListener('click', (e) => {
+        e.preventDefault();
+        openSaveRequestModal('grpc');
+      });
+    }
+    if (el.btnCloseSaveRequestModal) {
+      el.btnCloseSaveRequestModal.addEventListener('click', closeSaveRequestModal);
+    }
+    if (el.btnCancelSaveRequest) {
+      el.btnCancelSaveRequest.addEventListener('click', closeSaveRequestModal);
+    }
+    if (el.btnSaveRequestSubmit) {
+      el.btnSaveRequestSubmit.addEventListener('click', (e) => {
+        e.preventDefault();
+        onSaveRequestSubmit(e);
+      });
+    }
+    if (el.saveRequestModal) {
+      el.saveRequestModal.addEventListener('click', (e) => {
+        if (e.target === el.saveRequestModal) closeSaveRequestModal();
+      });
+    }
+    if (el.saveRequestForm) {
+      el.saveRequestForm.addEventListener('submit', onSaveRequestSubmit);
+    }
+  }
+
+  // --- REST Sidebar Navigation & Collections (v2) ---
+  function setupRESTSidebarTabs() {
+    const tabs = [
+      { btn: el.tabBtnSwagger, panel: el.panelSwagger, action: null },
+      { btn: el.tabBtnCollections, panel: el.panelCollections, action: () => loadRESTCollections() },
+      { btn: el.tabBtnHistory, panel: el.panelHistory, action: () => loadRESTHistory() }
+    ];
+
+    tabs.forEach(({ btn, panel, action }) => {
+      if (!btn) return;
+      btn.addEventListener('click', () => {
+        tabs.forEach(t => {
+          if (t.btn) t.btn.classList.remove('active');
+          if (t.panel) t.panel.classList.add('hidden');
+        });
+        btn.classList.add('active');
+        if (panel) panel.classList.remove('hidden');
+        if (action) action();
+      });
+    });
+
+    if (el.restCollectionsSearch) {
+      el.restCollectionsSearch.addEventListener('input', (e) => loadRESTCollections(e.target.value));
+    }
+    if (el.restHistorySearch) {
+      el.restHistorySearch.addEventListener('input', (e) => loadRESTHistory(e.target.value));
+    }
+    if (el.btnClearRestHistory) {
+      el.btnClearRestHistory.addEventListener('click', clearRESTHistory);
+    }
+  }
+
+  async function loadRESTCollections(filterText = '') {
+    if (!el.restCollectionsContainer) return;
+    try {
+      const data = await apiGet('/api/snippets?protocol=http');
+      const snippets = data.snippets || [];
+
+      if (snippets.length === 0) {
+        el.restCollectionsContainer.innerHTML = '<div class="empty-state">No saved requests yet. Click "Save" above to organize into collections!</div>';
+        return;
+      }
+
+      // Group by collection
+      const grouped = {};
+      snippets.forEach(snip => {
+        const col = snip.collection || 'Default';
+        if (!grouped[col]) grouped[col] = [];
+        grouped[col].push(snip);
+      });
+
+      const q = filterText.toLowerCase().trim();
+      let html = '';
+
+      Object.entries(grouped).forEach(([colName, items]) => {
+        const filtered = items.filter(it => !q || it.title.toLowerCase().includes(q) || (it.path && it.path.toLowerCase().includes(q)));
+        if (filtered.length === 0) return;
+
+        html += `
+          <div class="collection-group">
+            <div class="collection-group-title">
+              <svg class="icon icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+              <span>${escapeHtml(colName)}</span>
+              <span class="badge-v2" style="margin-left:auto;">${filtered.length}</span>
+            </div>
+            <div class="collection-group-items">
+        `;
+
+        filtered.forEach(it => {
+          const method = (it.method || 'GET').toUpperCase();
+          html += `
+            <div class="collection-item" data-id="${it.id}">
+              <div class="collection-item-main">
+                <span class="method-badge method-${method.toLowerCase()}">${method}</span>
+                <span class="collection-item-title" title="${escapeHtml(it.path || '')}">${escapeHtml(it.title)}</span>
+              </div>
+              <button type="button" class="btn btn-icon btn-icon-xs btn-delete-snip" data-id="${it.id}" title="Delete">&times;</button>
+            </div>
+          `;
+        });
+
+        html += `</div></div>`;
+      });
+
+      el.restCollectionsContainer.innerHTML = html || '<div class="empty-state">No matching requests found</div>';
+
+      // Event listeners for loading and deleting
+      el.restCollectionsContainer.querySelectorAll('.collection-item').forEach(itemEl => {
+        const snipId = itemEl.getAttribute('data-id');
+        const snip = snippets.find(s => s.id === snipId);
+        itemEl.addEventListener('click', (e) => {
+          if (e.target.classList.contains('btn-delete-snip')) return;
+          if (snip) loadSavedRequestIntoWorkbench(snip);
+        });
+      });
+
+      el.restCollectionsContainer.querySelectorAll('.btn-delete-snip').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const snipId = btn.getAttribute('data-id');
+          if (confirm('Delete this saved request?')) {
+            try {
+              await apiDelete(`/api/snippets/${snipId}`);
+              loadRESTCollections(filterText);
+              showToast('Request deleted from collection', 'info');
+            } catch (err) {
+              showToast('Failed to delete: ' + err.message, 'error');
+            }
+          }
+        });
+      });
+    } catch (err) {
+      console.error('Failed to load REST collections:', err);
+    }
+  }
+
+  function loadSavedRequestIntoWorkbench(snip) {
+    if (el.restMethodSelect) el.restMethodSelect.value = (snip.method || 'GET').toUpperCase();
+    if (el.restUrlInput) el.restUrlInput.value = snip.path || '';
+
+    // Headers
+    if (el.restHeadersRows) {
+      el.restHeadersRows.innerHTML = '';
+      if (snip.headers && Object.keys(snip.headers).length > 0) {
+        Object.entries(snip.headers).forEach(([k, v]) => addRESTHeaderRow(k, v));
+      } else {
+        addRESTHeaderRow('Content-Type', 'application/json');
+      }
+      updateRESTHeaderCount();
+    }
+
+    // Params
+    if (el.restParamsRows) {
+      el.restParamsRows.innerHTML = '';
+      if (snip.query_params && Object.keys(snip.query_params).length > 0) {
+        Object.entries(snip.query_params).forEach(([k, v]) => addRESTParamRow(k, v));
+      }
+      updateRESTParamCount();
+    }
+
+    // Body
+    const bType = snip.body_type || (snip.content ? 'json' : 'none');
+    setRESTBodyType(bType);
+    if (bType === 'json' && restState.bodyEditor && snip.content) {
+      restState.bodyEditor.setValue(snip.content);
+    } else if (bType === 'raw' && el.restBodyRawInput) {
+      el.restBodyRawInput.value = snip.content || '';
+    } else if ((bType === 'form_data' || bType === 'x_www_form_urlencoded') && el.restFormRows && snip.form_data) {
+      el.restFormRows.innerHTML = '';
+      Object.entries(snip.form_data).forEach(([k, v]) => addRESTFormRow(k, v));
+    }
+
+    showToast(`Loaded "${snip.title}"`, 'info');
+  }
+
+  async function loadRESTHistory(filterText = '') {
+    if (!el.restHistoryContainer) return;
+    try {
+      const data = await apiGet('/api/history?protocol=http');
+      const history = data.history || [];
+
+      if (history.length === 0) {
+        el.restHistoryContainer.innerHTML = '<div class="empty-state">No executed HTTP requests yet</div>';
+        return;
+      }
+
+      const q = filterText.toLowerCase().trim();
+      const filtered = history.filter(h => !q || (h.path && h.path.toLowerCase().includes(q)) || (h.method && h.method.toLowerCase().includes(q)));
+
+      if (filtered.length === 0) {
+        el.restHistoryContainer.innerHTML = '<div class="empty-state">No matching history records</div>';
+        return;
+      }
+
+      let html = '';
+      filtered.forEach((h, idx) => {
+        const method = (h.method || 'GET').toUpperCase();
+        const status = h.status || 0;
+        let badgeClass = 'status-2xx';
+        if (status >= 500) badgeClass = 'status-5xx';
+        else if (status >= 400) badgeClass = 'status-4xx';
+        else if (status >= 300) badgeClass = 'status-3xx';
+
+        const timeStr = h.took_ms ? `${h.took_ms}ms` : '';
+        html += `
+          <div class="rest-history-item" data-idx="${idx}">
+            <div class="rest-history-main">
+              <span class="method-badge method-${method.toLowerCase()}">${method}</span>
+              <span class="rest-history-url" title="${escapeHtml(h.path || '')}">${escapeHtml(h.path || '')}</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="rest-status-badge ${badgeClass}" style="font-size:10px; padding:1px 5px;">${status || 'ERR'}</span>
+              <span style="font-size:10px; color:var(--text-muted); font-family:var(--font-mono);">${timeStr}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      el.restHistoryContainer.innerHTML = html;
+
+      el.restHistoryContainer.querySelectorAll('.rest-history-item').forEach(itemEl => {
+        const idx = parseInt(itemEl.getAttribute('data-idx'), 10);
+        const item = filtered[idx];
+        itemEl.addEventListener('click', () => {
+          if (el.restMethodSelect && item.method) el.restMethodSelect.value = item.method.toUpperCase();
+          if (el.restUrlInput && item.path) el.restUrlInput.value = item.path;
+          if (item.raw_input && restState.bodyEditor) {
+            setRESTBodyType('json');
+            restState.bodyEditor.setValue(item.raw_input);
+          }
+          showToast(`Loaded ${item.method} ${item.path}`, 'info');
+        });
+      });
+    } catch (err) {
+      console.error('Failed to load REST history:', err);
+    }
+  }
+
+  async function clearRESTHistory() {
+    if (!confirm('Clear all HTTP query history?')) return;
+    try {
+      await apiDelete('/api/history');
+      await loadRESTHistory();
+      showToast('History cleared', 'info');
+    } catch (err) {
+      showToast('Failed to clear history: ' + err.message, 'error');
+    }
   }
 
   document.addEventListener('DOMContentLoaded', init);

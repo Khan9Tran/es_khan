@@ -92,6 +92,12 @@ func (s *Server) setupRoutes() {
 		r.Post("/connections/{id}/activate", s.handleActivateConnection)
 		r.Post("/connections/test", s.handleTestConnection)
 
+		// Environments (v2)
+		r.Get("/environments", s.handleGetEnvironments)
+		r.Post("/environments", s.handleSaveEnvironment)
+		r.Delete("/environments/{id}", s.handleDeleteEnvironment)
+		r.Post("/environments/{id}/activate", s.handleActivateEnvironment)
+
 		// Cluster & Indices
 		r.Get("/cluster/info", s.handleGetClusterInfo)
 		r.Get("/indices", s.handleGetIndices)
@@ -136,12 +142,23 @@ func (s *Server) setupRoutes() {
 		r.Post("/grpc/reflect", s.handleGRPCReflect)
 		r.Post("/grpc/invoke", s.handleGRPCInvoke)
 		r.Post("/grpc/proto/parse", s.handleGRPCParseProto)
+
+		// HTTP & API Client Proxy (v2)
+		r.Post("/http/send", s.handleHTTPSend)
+
+		// OpenAPI & Swagger Studio (v2)
+		r.Post("/openapi/parse", s.handleOpenAPIParse)
 	})
 
 	// Static Web UI assets
 	if s.staticFS != nil {
 		fileServer := http.FileServer(http.FS(s.staticFS))
-		r.Handle("/*", fileServer)
+		r.Handle("/*", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+			w.Header().Set("Pragma", "no-cache")
+			w.Header().Set("Expires", "0")
+			fileServer.ServeHTTP(w, r)
+		}))
 	}
 
 	s.router = r

@@ -3,38 +3,48 @@ package storage
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
 
-// HistoryItem represents an executed query log entry.
+// HistoryItem represents an executed query or API request log entry.
 type HistoryItem struct {
 	ID           string    `json:"id"`
+	Protocol     string    `json:"protocol,omitempty"` // "es", "http", "grpc"
 	Timestamp    time.Time `json:"timestamp"`
-	ConnectionID string    `json:"connection_id"`
-	Index        string    `json:"index"`
-	Method       string    `json:"method"`
-	Path         string    `json:"path"`
-	RawInput     string    `json:"raw_input"`
-	Status       int       `json:"status"`
+	ConnectionID string    `json:"connection_id,omitempty"`
+	Index        string    `json:"index,omitempty"`
+	Method       string    `json:"method"` // GET, POST, or RPC method name
+	Path         string    `json:"path"`   // ES path, HTTP URL, or gRPC service/method
+	RawInput     string    `json:"raw_input,omitempty"`
+	Status       int       `json:"status"` // HTTP status or gRPC code (0 = OK)
+	StatusText   string    `json:"status_text,omitempty"`
 	TookMs       int64     `json:"took_ms"`
-	TotalHits    int64     `json:"total_hits"`
+	TotalHits    int64     `json:"total_hits,omitempty"`
 }
 
-// SnippetItem represents a saved, reusable query snippet.
+// SnippetItem represents a saved, reusable query snippet or saved API request in Collections.
 type SnippetItem struct {
-	ID          string    `json:"id"`
-	Title       string    `json:"title"`
-	Description string    `json:"description,omitempty"`
-	Tags        []string  `json:"tags,omitempty"`
-	Method      string    `json:"method"`
-	Path        string    `json:"path"`
-	Content     string    `json:"content"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID          string            `json:"id"`
+	Protocol    string            `json:"protocol,omitempty"`   // "es", "http", "grpc"
+	Collection  string            `json:"collection,omitempty"` // Group/collection name
+	Title       string            `json:"title"`
+	Description string            `json:"description,omitempty"`
+	Tags        []string          `json:"tags,omitempty"`
+	Method      string            `json:"method"`
+	Path        string            `json:"path"` // ES path, HTTP URL, or gRPC target/service/method
+	Content     string            `json:"content"`
+	Headers     map[string]string `json:"headers,omitempty"`
+	QueryParams map[string]string `json:"query_params,omitempty"`
+	BodyType    string            `json:"body_type,omitempty"`
+	FormData    map[string]string `json:"form_data,omitempty"`
+	CreatedAt   time.Time         `json:"created_at"`
+	UpdatedAt   time.Time         `json:"updated_at"`
 }
 
 // StorageData holds the persisted state.
@@ -45,11 +55,11 @@ type StorageData struct {
 
 // Store provides thread-safe access to persistent history and snippets.
 type Store struct {
-	mu          sync.RWMutex
-	filePath    string
-	maxHistory  int
-	history     []HistoryItem
-	snippets    []SnippetItem
+	mu         sync.RWMutex
+	filePath   string
+	maxHistory int
+	history    []HistoryItem
+	snippets   []SnippetItem
 }
 
 // NewStore initializes a history and snippet store.
@@ -81,7 +91,13 @@ func NewStore(customPath string, maxHistory int) (*Store, error) {
 				return nil, fmt.Errorf("failed to save initial store: %w", saveErr)
 			}
 		} else {
-			return nil, fmt.Errorf("failed to load store from %s: %w", path, err)
+			// If corrupted, backup damaged file and recover with defaults
+			backupPath := fmt.Sprintf("%s.corrupted.%d", path, time.Now().Unix())
+			_ = os.Rename(path, backupPath)
+			log.Printf("⚠️ Corrupted store file %s backed up to %s. Initializing fresh store.", path, backupPath)
+			if saveErr := s.save(); saveErr != nil {
+				return nil, fmt.Errorf("failed to recover store: %w", saveErr)
+			}
 		}
 	}
 
@@ -138,10 +154,32 @@ func (s *Store) save() error {
 		return fmt.Errorf("failed to marshal store: %w", err)
 	}
 
-	if err := os.WriteFile(s.filePath, data, 0600); err != nil {
-		return fmt.Errorf("failed to write data to %s: %w", s.filePath, err)
-	}
+	return atomicWriteFile(s.filePath, data, 0600)
+}
 
+func atomicWriteFile(filePath string, data []byte, perm os.FileMode) error {
+	dir := filepath.Dir(filePath)
+	tmpFile, err := os.CreateTemp(dir, "tmp-*")
+	if err != nil {
+		return fmt.Errorf("failed to create temp file: %w", err)
+	}
+	tmpName := tmpFile.Name()
+	defer os.Remove(tmpName)
+
+	if _, err := tmpFile.Write(data); err != nil {
+		tmpFile.Close()
+		return fmt.Errorf("failed to write temp file: %w", err)
+	}
+	if err := tmpFile.Chmod(perm); err != nil {
+		tmpFile.Close()
+		return fmt.Errorf("failed to chmod temp file: %w", err)
+	}
+	if err := tmpFile.Close(); err != nil {
+		return fmt.Errorf("failed to close temp file: %w", err)
+	}
+	if err := os.Rename(tmpName, filePath); err != nil {
+		return fmt.Errorf("failed to atomically replace %s: %w", filePath, err)
+	}
 	return nil
 }
 
@@ -177,6 +215,27 @@ func (s *Store) GetHistory(limit int) []HistoryItem {
 	result := make([]HistoryItem, limit)
 	copy(result, s.history[:limit])
 	return result
+}
+
+// GetHistoryByProtocol returns history filtered by protocol ("es", "http", "grpc").
+func (s *Store) GetHistoryByProtocol(protocol string, limit int) []HistoryItem {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	var filtered []HistoryItem
+	for _, item := range s.history {
+		p := item.Protocol
+		if p == "" {
+			p = "es" // legacy fallback
+		}
+		if strings.EqualFold(p, protocol) {
+			filtered = append(filtered, item)
+			if limit > 0 && len(filtered) >= limit {
+				break
+			}
+		}
+	}
+	return filtered
 }
 
 // ClearHistory deletes all query history records.
@@ -241,6 +300,29 @@ func (s *Store) GetSnippets() []SnippetItem {
 	})
 
 	return result
+}
+
+// GetSnippetsByProtocol returns snippets filtered by protocol ("es", "http", "grpc").
+func (s *Store) GetSnippetsByProtocol(protocol string) []SnippetItem {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	var filtered []SnippetItem
+	for _, snip := range s.snippets {
+		p := snip.Protocol
+		if p == "" {
+			p = "es"
+		}
+		if strings.EqualFold(p, protocol) {
+			filtered = append(filtered, snip)
+		}
+	}
+
+	sort.Slice(filtered, func(i, j int) bool {
+		return filtered[i].Title < filtered[j].Title
+	})
+
+	return filtered
 }
 
 // DefaultSnippets returns useful out-of-the-box templates.

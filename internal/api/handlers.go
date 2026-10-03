@@ -286,7 +286,14 @@ func (s *Server) handleGetHistory(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	items := s.storage.GetHistory(limit)
+	protocol := r.URL.Query().Get("protocol")
+	var items []storage.HistoryItem
+	if protocol != "" && protocol != "all" {
+		items = s.storage.GetHistoryByProtocol(protocol, limit)
+	} else {
+		items = s.storage.GetHistory(limit)
+	}
+
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"history": items,
 	})
@@ -303,7 +310,14 @@ func (s *Server) handleClearHistory(w http.ResponseWriter, r *http.Request) {
 // Snippets Handlers
 
 func (s *Server) handleGetSnippets(w http.ResponseWriter, r *http.Request) {
-	snippets := s.storage.GetSnippets()
+	protocol := r.URL.Query().Get("protocol")
+	var snippets []storage.SnippetItem
+	if protocol != "" && protocol != "all" {
+		snippets = s.storage.GetSnippetsByProtocol(protocol)
+	} else {
+		snippets = s.storage.GetSnippets()
+	}
+
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"snippets": snippets,
 	})
@@ -746,5 +760,3 @@ func (s *Server) handleConvertToDSL(w http.ResponseWriter, r *http.Request) {
 		"query_dsl": queryDSL,
 	})
 }
-
-

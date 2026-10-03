@@ -209,3 +209,36 @@ service BookService {
 	}
 }
 
+func TestInvokeWithVariables(t *testing.T) {
+	addr, cleanup := startTestServer(t)
+	defer cleanup()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	req := InvokeRequest{
+		Target:    "{{grpc_host}}",
+		Plaintext: true,
+		Service:   "{{service_name}}",
+		Method:    "Check",
+		Metadata: map[string]string{
+			"authorization": "Bearer {{token}}",
+		},
+		Body: `{"service": "{{check_service}}"}`,
+		Variables: map[string]string{
+			"grpc_host":     addr,
+			"service_name":  "grpc.health.v1.Health",
+			"token":         "my-grpc-jwt",
+			"check_service": "",
+		},
+	}
+
+	resp, err := Invoke(ctx, req)
+	if err != nil {
+		t.Fatalf("Invoke with variables failed: %v", err)
+	}
+
+	if resp.StatusCode != "OK" {
+		t.Errorf("expected OK status, got %s", resp.StatusCode)
+	}
+}

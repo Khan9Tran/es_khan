@@ -14,10 +14,18 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+
+	"eskhan/internal/variable"
 )
 
 // Invoke executes a dynamic RPC call based on the provided InvokeRequest.
 func Invoke(ctx context.Context, req InvokeRequest) (*InvokeResponse, error) {
+	req.Target = variable.Eval(req.Target, req.Variables)
+	req.Service = variable.Eval(req.Service, req.Variables)
+	req.Method = variable.Eval(req.Method, req.Variables)
+	req.Metadata = variable.EvalMap(req.Metadata, req.Variables)
+	req.Body = variable.Eval(req.Body, req.Variables)
+
 	if req.Target == "" {
 		return nil, fmt.Errorf("target is required")
 	}

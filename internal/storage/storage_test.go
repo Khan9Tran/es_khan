@@ -75,3 +75,79 @@ func TestStorageHistoryAndSnippets(t *testing.T) {
 		t.Errorf("expected 0 history items after clear")
 	}
 }
+
+func TestMultiProtocolStorage(t *testing.T) {
+	tempDir, err := os.MkdirTemp("", "eskhan-store-proto-*")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	dataPath := filepath.Join(tempDir, "data.json")
+	store, err := NewStore(dataPath, 20)
+	if err != nil {
+		t.Fatalf("failed to initialize store: %v", err)
+	}
+
+	// Add HTTP snippet
+	httpSnippet := SnippetItem{
+		Protocol:   "http",
+		Collection: "Auth Service",
+		Title:      "Login API",
+		Method:     "POST",
+		Path:       "https://api.example.com/v1/auth/login",
+		Content:    `{"username":"admin"}`,
+	}
+	if err := store.SaveSnippet(httpSnippet); err != nil {
+		t.Fatalf("failed to save http snippet: %v", err)
+	}
+
+	// Add gRPC snippet
+	grpcSnippet := SnippetItem{
+		Protocol:   "grpc",
+		Collection: "User Service",
+		Title:      "GetUser RPC",
+		Method:     "GetUser",
+		Path:       "localhost:50051/user.v1.UserService/GetUser",
+		Content:    `{"id":123}`,
+	}
+	if err := store.SaveSnippet(grpcSnippet); err != nil {
+		t.Fatalf("failed to save grpc snippet: %v", err)
+	}
+
+	httpSnips := store.GetSnippetsByProtocol("http")
+	if len(httpSnips) != 1 || httpSnips[0].Title != "Login API" {
+		t.Errorf("expected 1 http snippet, got %v", httpSnips)
+	}
+
+	grpcSnips := store.GetSnippetsByProtocol("grpc")
+	if len(grpcSnips) != 1 || grpcSnips[0].Title != "GetUser RPC" {
+		t.Errorf("expected 1 grpc snippet, got %v", grpcSnips)
+	}
+
+	// Add multi-protocol history
+	_ = store.AddHistory(HistoryItem{
+		Protocol: "http",
+		Method:   "GET",
+		Path:     "https://api.example.com/users",
+		Status:   200,
+		TookMs:   45,
+	})
+	_ = store.AddHistory(HistoryItem{
+		Protocol: "grpc",
+		Method:   "Check",
+		Path:     "localhost:50051/grpc.health.v1.Health/Check",
+		Status:   0,
+		TookMs:   12,
+	})
+
+	httpHistory := store.GetHistoryByProtocol("http", 10)
+	if len(httpHistory) != 1 || httpHistory[0].Path != "https://api.example.com/users" {
+		t.Errorf("expected 1 http history, got %v", httpHistory)
+	}
+
+	grpcHistory := store.GetHistoryByProtocol("grpc", 10)
+	if len(grpcHistory) != 1 || grpcHistory[0].Path != "localhost:50051/grpc.health.v1.Health/Check" {
+		t.Errorf("expected 1 grpc history, got %v", grpcHistory)
+	}
+}
