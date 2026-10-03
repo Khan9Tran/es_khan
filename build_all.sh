@@ -2,7 +2,7 @@
 set -e
 
 # Version & Build Metadata
-VERSION=${1:-"v1.0.0"}
+VERSION=${1:-"v2.0.0"}
 COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "dev")
 BUILD_DATE=$(date -u +%Y-%m-%d)
 AUTHOR="Khan9Tran"
